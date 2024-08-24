@@ -1,0 +1,24 @@
+@media (max-width: 768px) {
+    .col-1 {
+      display: none !important; 
+    }
+    .col-11{
+        margin: 0 35px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .col-1 {
+      display: none !important; 
+    }
+    .col-11{
+        margin: 0 26px !important;
+    }
+}
+
+
+
+.col-1{
+    padding: 0 33px !important;
+}
+
