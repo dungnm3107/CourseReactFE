@@ -1,12 +1,11 @@
-import React from "react";
-import '../../assets/css/coursel.css'
+import '../../assets/css/course.css'
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Keyboard, Mousewheel, Navigation, Pagination } from "swiper/modules";
-import img from "../../assets/imgbg.jpg";
-export default function Coursel() {
+import img from "../../assets/images/imgbg.jpg";
+export default function Course() {
   return (
     <>
     <div className="container-fluid mt-2 mb-2 nav">
@@ -17,9 +16,10 @@ export default function Coursel() {
       mousewheel={true}
       keyboard={true}
       autoplay={{
-        delay: 2500,
+        delay: 10000,
         disableOnInteraction: false,
       }}
+      loop={true} // trượt theo vòng tròn
       modules={[Autoplay,Navigation, Pagination, Mousewheel, Keyboard]}
       className="mySwiper"
     >

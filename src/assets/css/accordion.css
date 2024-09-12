@@ -8,3 +8,32 @@
     position: absolute;
     right: 55px;
 }
+.accordion-button {
+    display: flex;
+    align-items: center;
+  }
+  
+  .icon-container {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+  }
+  
+  .icon-collapsed, .icon-expanded {
+    color: #fa9200;
+  }
+  
+  .accordion-button.collapsed .icon-expanded {
+    display: none;
+  }
+  
+  .accordion-button:not(.collapsed) .icon-collapsed {
+    display: none;
+  }
+  
+  .text-right-col {
+    margin-left: auto;
+  }

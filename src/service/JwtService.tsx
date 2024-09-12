@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import { JwtPayload } from "../components/RequireAdmin";
+import { JwtPayload } from "./RequireAdmin";
 
 // check token đã hết hạn chưa
 export function isTokenExpired(token: string) {
@@ -36,12 +36,18 @@ export function getUsernameByToken() {
  }
 
  export function getIdUserByToken() {
-    const token = localStorage.getItem('token');
-    if (token) {
-       const decodedToken = jwtDecode(token) as JwtPayload;
-       return decodedToken.id;
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decodedToken = jwtDecode(token) as JwtPayload;
+        return decodedToken.id;
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
     }
- }
+    return null;
+  }
 
  export function getRoleByToken() {
     const token = localStorage.getItem('token');
@@ -52,8 +58,3 @@ export function getUsernameByToken() {
 }
 
 
-export function logout(navigate: any) {
-    navigate("/login");
-    localStorage.removeItem('token');
-    localStorage.removeItem('cart');
- }

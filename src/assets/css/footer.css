@@ -1,0 +1,15 @@
+footer .text-left {
+  text-align: left !important;
+}
+
+footer .list-unstyled li {
+  margin-bottom: 0.5rem;
+}
+
+.social-icons {
+  z-index: 1002;
+}
+
+footer {
+  overflow: hidden;
+}

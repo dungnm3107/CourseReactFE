@@ -1,14 +1,30 @@
 import React from "react";
 import { Avatar, Button } from "@mui/material";
 import { Link, NavLink } from "react-router-dom";
-import logo from"../../assets/logo3.png"
+import logo from "../../assets/images/logoCourse.png";
+import "../../assets/css/navbar.css";
+import { useLogout } from "../../hooks /useLogout";
+import { useAuth } from "../../service/AuthContext";
 
-export  function NavBar() {
+interface NavBarProps {
+  onOpenLoginModal: () => void;
+  onOpenSignUpModal: () => void;
+}
+
+export function NavBar({ onOpenLoginModal, onOpenSignUpModal, avatar }: NavBarProps & { avatar: string }) {
+  const { isLoggedIn } = useAuth();
+  const logout = useLogout();
+
   return (
-    
     <nav
       className="navbar navbar-expand-lg navbar-light bg-light sticky-top"
-      style={{ zIndex: 10 , position: "sticky" , top: 0 , borderBottom:"1px solid #e8ebed " , backgroundColor: "#fff"}}
+      style={{
+        zIndex: 10,
+        position: "sticky",
+        top: 0,
+        borderBottom: "1px solid #e8ebed ",
+        backgroundColor: "#fff",
+      }}
     >
       {/* <!-- Container wrapper --> */}
       <div className="container-fluid">
@@ -28,15 +44,17 @@ export  function NavBar() {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           {/* <!-- Navbar brand --> */}
           <Link className="navbar-brand mt-2 mt-lg-0" to="/">
-            <img
-              src={logo}
-              width="50"
-              alt="MDB Logo"
-              loading="lazy"
-            />
+            <img src={logo} width="50" alt="MDB Logo" loading="lazy" />
           </Link>
           {/* <!-- Left links --> */}
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <ul
+            className="navbar-nav me-auto mb-2 mb-lg-0"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <li className="nav-item">
               <NavLink className="nav-link fw-bold " to="/">
                 Trang chủ
@@ -55,27 +73,15 @@ export  function NavBar() {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-               Kho Khóa Học
+                Khóa Học
               </a>
-             <ul className="dropdown-menu">
-                <li>
-                    <Link className="dropdown-item" to={"/blog"}>
-                       Khóa Học 1
-                    </Link>
-                </li>
-                <li>
-                    <Link className="dropdown-item" to={"/news"}>
-                      Khóa Học 1
-                    </Link>
-                </li>
-            </ul>
             </li>
             <li className="nav-item">
               <Link className="nav-link fw-bold" to={"/policy"}>
-                 Bài Viết
+                Bài Viết
               </Link>
             </li>
-            
+
             <li className="nav-item">
               <Link className="nav-link fw-bold" to={"/policy"}>
                 Chính sách
@@ -85,25 +91,49 @@ export  function NavBar() {
           {/* <!-- Left links --> */}
         </div>
         {/* <!-- Collapsible wrapper --> */}
-        {/* <!-- Right elements --> */}
-        <div className="d-flex align-items-center">
-          {/* <!-- Shopping Cart --> */}
-          <Link className="text-reset me-3" to="/cart">
-            <i className="fas fa-shopping-cart"></i>
-            <span className="badge rounded-pill badge-notification bg-danger"></span>
-          </Link>
 
+        {/* Centered search bar */}
+        <div className="flex-grow-1 d-flex justify-content">
+          <form className="d-flex input-group w-75">
+            <div className="input-group">
+              <input
+                type="search"
+                className="form-control"
+                placeholder="Tìm kiếm khóa học..."
+                aria-label="Search"
+                style={{ borderRadius: "20px 0 0 20px" }}
+              />
+              <button
+                className="btn btn-outline-primary"
+                type="button"
+                id="button-addon2"
+                style={{ borderRadius: "0 20px 20px 0" }}
+              >
+                <i className="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {!isLoggedIn ? (
           <div>
-            <Link to={"/login"}>
-              <Button>Đăng nhập</Button>
-            </Link>
-            <Link to={"/register"}>
-              <Button>Đăng ký</Button>
-            </Link>
+            <Button
+              className="btn-custom-bold"
+              variant="text"
+              onClick={onOpenLoginModal}
+            >
+              Đăng nhập
+            </Button>
+            <Button
+              className="btn-custom-bold"
+              variant="text"
+              onClick={onOpenSignUpModal}
+            >
+              Đăng ký
+            </Button>
           </div>
-
-          <>
-            {/* <!-- Notifications --> */}
+        ) : (
+          <div className="d-flex align-items-center">
             <div className="dropdown">
               <a
                 className="text-reset me-3 dropdown-toggle hidden-arrow"
@@ -124,22 +154,11 @@ export  function NavBar() {
               >
                 <li>
                   <a className="dropdown-item" href="#">
-                    Some news
-                  </a>
-                </li>
-                <li>
-                  <a className="dropdown-item" href="#">
-                    Another news
-                  </a>
-                </li>
-                <li>
-                  <a className="dropdown-item" href="#">
-                    Something else here
+                    Thông báo mới
                   </a>
                 </li>
               </ul>
             </div>
-            {/* <!-- Avatar --> */}
             <div className="dropdown">
               <a
                 className="dropdown-toggle d-flex align-items-center hidden-arrow"
@@ -150,9 +169,8 @@ export  function NavBar() {
                 aria-expanded="false"
               >
                 <Avatar
+                  src={avatar || "/path/to/default/avatar.jpg"}
                   style={{ fontSize: "14px" }}
-                  // alt={getLastNameByToken()?.toUpperCase()}
-                  // src={getAvatarByToken()}
                   sx={{ width: 30, height: 30 }}
                 />
               </a>
@@ -167,28 +185,32 @@ export  function NavBar() {
                 </li>
                 <li>
                   <Link className="dropdown-item" to="">
-                    Sách yêu thích của tôi
+                    Viết blog
                   </Link>
                 </li>
-
                 <li>
                   <Link className="dropdown-item" to="">
-                    Quản lý
+                    Trang quản lý
                   </Link>
                 </li>
                 <li>
-                  <a className="dropdown-item" style={{ cursor: "pointer" }}>
+                  <Button
+                    className="dropdown-item"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      logout();
+                    }}
+                  >
                     Đăng xuất
-                  </a>
+                  </Button>
                 </li>
               </ul>
             </div>
-          </>
-        </div>
-        {/* <!-- Right elements --> */}
+          </div>
+        )}
       </div>
-      {/* <!-- Container wrapper --> */}
     </nav>
   );
 }
+
 export default NavBar;

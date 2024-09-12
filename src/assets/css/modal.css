@@ -1,0 +1,32 @@
+.blur-background {
+  filter: blur(5px);
+  transition: filter 0.3s ease-in-out;
+}
+
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+  margin-left: 100px;
+  padding-bottom: 200px; 
+  
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  margin-right: 50px;
+  margin-left: 40px;
+}
+
+footer {
+  width: 100%;
+  position: relative;
+  z-index: 1001; 
+}

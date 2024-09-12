@@ -1,143 +1,112 @@
-import { faCirclePlay, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCirclePlay,
+  faPlus,
+  faMinus,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
 import "../../assets/css/accordion.css";
+import { useState, useEffect } from "react";
+import axiosInstance from "../../config/axios";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+interface Chapter {
+  id: number;
+  sequence: number;
+  title: string;
+  description: string;
+  chapterSequence: number;
+  lessons: Lesson[];
+}
+
+interface Lesson {
+  id: number;
+  title: string;
+  lessonSequence: number;
+}
+
 export default function Accordion() {
+  const { id: courseId } = useParams<{ id: string }>();
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+
+  useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        if (!courseId) {
+          console.error("Course ID is missing");
+          return;
+        }
+        console.log("Fetching chapters for courseId:", courseId);
+        const response = await axiosInstance.get(
+          `/api/v1/chapter/get/${courseId}`
+        );
+        console.log("API response:", response.data.result);
+        if (response.data && Array.isArray(response.data.result)) {
+          setChapters(response.data.result);
+        } else {
+          console.error("Unexpected data structure:", response.data);
+          setChapters([]);
+        }
+      } catch (error) {
+        console.error("Error fetching chapters:", error);
+        if (axios.isAxiosError(error)) {
+          console.error("Response data:", error.response?.data);
+          console.error("Request config:", error.config);
+        }
+      }
+    };
+
+    fetchChapters();
+  }, [courseId]);
+
   return (
     <div>
       <div className="accordion" id="accordionPanelsStayOpenExample">
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="panelsStayOpen-headingOne">
-            <button
-              className="accordion-button"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#panelsStayOpen-collapseOne"
-              aria-expanded="true"
-              aria-controls="panelsStayOpen-collapseOne"
+        {chapters.map((chapter, index) => (
+          <div className="accordion-item" key={chapter.id}>
+            <h2 className="accordion-header">
+              <button
+                className="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target={`#collapse${index}`}
+                aria-expanded="false"
+                aria-controls={`collapse${index}`}
+              >
+                <span className="fw-bold icon-container">
+                  <FontAwesomeIcon icon={faPlus} className="icon-collapsed" />
+                  <FontAwesomeIcon icon={faMinus} className="icon-expanded" />
+                </span>
+                <span className="fw-bold">
+                  {chapter.chapterSequence ?? "No sequence"}.{" "}
+                  {chapter.title ?? "No title"}
+                </span>
+                <div className="text-right-col ms-auto">
+                  <span>{chapter.lessons?.length ?? 0}</span> bài học
+                </div>
+              </button>
+            </h2>
+            <div
+              id={`collapse${index}`}
+              className="accordion-collapse collapse"
+              aria-labelledby={`heading${index}`}
             >
-              <span className="fw-bold">
-                <FontAwesomeIcon icon={faPlus} style={{ color: "#fa9200" }} />{" "}
-                1.
-              </span>
-              <span style={{ marginLeft: "5px" }} className="fw-bold">
-                Cấu Hình Môi Trường
-              </span>
-              <div className="text-right-col"><span>3</span> bài học</div>
-            </button>
-          </h2>
-          <div
-            id="panelsStayOpen-collapseOne"
-            className="accordion-collapse collapse show"
-            aria-labelledby="panelsStayOpen-headingOne"
-          >
-            <div className="accordion-body">
-              <ul className="list-group">
-                <li className="list-group-item">
-                  <FontAwesomeIcon
-                    icon={faCirclePlay}
-                    style={{ color: "#fa9200" }}
-                  />{" "}
-                  <span>1.</span>Giới Thiệu Về React JS <span></span>
-                </li>
-                <li className="list-group-item">
-                  <FontAwesomeIcon
-                    icon={faCirclePlay}
-                    style={{ color: "#fa9200" }}
-                  />{" "}
-                  <span>2.</span> <span>Cài Đặt Biến Môi Trường</span>
-                </li>
-              </ul>
+              <div className="accordion-body">
+                <ul className="list-group">
+                  {chapter.lessons?.map((lesson, lessonIndex) => (
+                    <li className="list-group-item" key={lesson.id}>
+                      <FontAwesomeIcon
+                        icon={faCirclePlay}
+                        style={{ color: "#fa9200" }}
+                      />{" "}
+                      <span>{lesson.lessonSequence ?? lessonIndex + 1}. </span>
+                      {lesson.title ?? "No title"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="panelsStayOpen-headingTwo">
-            <button
-              className="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#panelsStayOpen-collapseTwo"
-              aria-expanded="false"
-              aria-controls="panelsStayOpen-collapseTwo"
-            >
-              <span className="fw-bold">
-                <FontAwesomeIcon icon={faPlus} style={{ color: "#fa9200" }} />{" "}
-                2.
-              </span>
-              <span style={{ marginLeft: "5px" }} className="fw-bold">
-                Bài Học React JS
-              </span>
-              <div className="text-right-col"><span>4</span> bài học</div>
-            </button>
-          </h2>
-          <div
-            id="panelsStayOpen-collapseTwo"
-            className="accordion-collapse collapse"
-            aria-labelledby="panelsStayOpen-headingTwo"
-          >
-            <div className="accordion-body">
-              <ul className="list-group">
-                <li className="list-group-item">
-                  <FontAwesomeIcon
-                    icon={faCirclePlay}
-                    style={{ color: "#fa9200" }}
-                  />{" "}
-                  <span>3.</span> <span>Học Lập Trình Cơ Bản</span>
-                </li>
-                <li className="list-group-item">
-                  <FontAwesomeIcon
-                    icon={faCirclePlay}
-                    style={{ color: "#fa9200" }}
-                  />{" "}
-                  <span>4.</span> <span>Cách Fetch Api bằng Axios</span>
-                </li>
-                <li className="list-group-item">
-                  <FontAwesomeIcon
-                    icon={faCirclePlay}
-                    style={{ color: "#fa9200" }}
-                  />{" "}
-                  <span>5.</span> <span>Cách Sử Dụng React Hook</span>
-                </li>
-                <li className="list-group-item">
-                  <FontAwesomeIcon
-                    icon={faCirclePlay}
-                    style={{ color: "#fa9200" }}
-                  />{" "}
-                  <span>6.</span> <span>Sử Dụng UseState Trong React Hook</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="panelsStayOpen-headingThree">
-            <button
-              className="accordion-button collapsed "
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#panelsStayOpen-collapseThree"
-              aria-expanded="false"
-              aria-controls="panelsStayOpen-collapseThree"
-            >
-              <span className="fw-bold">
-                <FontAwesomeIcon icon={faPlus} style={{ color: "#fa9200" }} />{" "}
-                3.
-              </span>
-              <span style={{ marginLeft: "5px" }} className="fw-bold">
-                Bài Học PHP
-              </span>
-               <div className="text-right-col"><span>3</span> bài học</div>
-            </button>
-          </h2>
-          <div
-            id="panelsStayOpen-collapseThree"
-            className="accordion-collapse collapse"
-            aria-labelledby="panelsStayOpen-headingThree"
-          >
-            <div className="accordion-body"></div>
-          </div>
-        </div>
+        ))}
       </div>
       <br></br>
       <br></br>

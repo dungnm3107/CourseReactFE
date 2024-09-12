@@ -7,7 +7,10 @@ import {
   faGauge,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function CardDetailRight() {
+interface CardDetailRightProps {
+  totalLessons: number;
+}
+export default function CardDetailRight({ totalLessons }: CardDetailRightProps) {
   return (
     <div className="row">
       <div className="col-12 mx-3">
@@ -35,7 +38,7 @@ export default function CardDetailRight() {
         />
       </div>
       <div className="col-12 d-flex justify-content-center mx-3 mt-4">
-        <h2 className="" style={{ color: "orange" }}>
+        <h2 className="" style={{ color: "#FF4000" }}>
           Miễn Phí
         </h2>
       </div>
@@ -43,7 +46,7 @@ export default function CardDetailRight() {
         <button
           style={{
             color: "white",
-            backgroundColor: "black",
+            backgroundColor: "#3366cc",
             borderRadius: "20px",
             width: "180px",
             height: "40px",
@@ -64,7 +67,7 @@ export default function CardDetailRight() {
           <li className="list-group-item">
             <FontAwesomeIcon icon={faFilm} />
             <span className="mx-2">
-              Tổng Số <strong>7</strong> Bài học
+              Tổng Số <strong>{totalLessons}</strong> Bài học
             </span>
           </li>
           <li className="list-group-item">

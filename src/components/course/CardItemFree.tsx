@@ -10,12 +10,12 @@ interface Course {
   courseType: 'FREE' | 'PAID';
 }
 
-interface CardItemProps {
+interface CardItemFreeProps {
   course: Course;
 }
 
-export default function CardItem({ course }: CardItemProps) {
-  return (
+export default function CardItemFree({ course }: CardItemFreeProps) {
+  return (  
       <div
         className="card card-hover"
         style={{ borderRadius: "16px" }}
@@ -28,9 +28,8 @@ export default function CardItem({ course }: CardItemProps) {
             alt={course.title}
           />
           <h5 className="card-title mt-2 fw-bold" style={{ color: "black" }}>{course.title}</h5>
-          <p className="card-text fw-bold">
-            <span style={{ color: "#DC143C" }}>{course.coursePrice.toLocaleString()}đ</span>
-          </p>
+          {/* <p className="card-text" style={{ color: "gray" }}>{course.description}</p> */}
+          <h5 className="card-title mt-3" style={{ color: 'rgb(233, 69, 29)' }}>Miễn phí</h5>
         </div>
       </div>
   );

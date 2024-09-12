@@ -1,0 +1,9 @@
+.btn-custom-bold {
+  font-weight: 700;
+  text-transform: none;
+  font-size: 14px;
+}
+.container-fluid {
+  margin-left: 10px;
+  margin-right: 20px;
+}
