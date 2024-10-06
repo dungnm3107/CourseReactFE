@@ -5,7 +5,7 @@ import "../../assets/css/footer.css";
 export default function Footer() {
   return (
     <footer
-      style={{ backgroundColor: "black", width: "100%" }}
+      style={{ backgroundColor: "#111111", width: "100%" }}
       className="text-white mt-3 position-relative"
     >
       <div className="container p-4">
@@ -51,7 +51,7 @@ export default function Footer() {
       </div>
       <div
         className="text-center p-3"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
+        style={{ backgroundColor: "#111111" }}
       >
         © 2024 Copyright
         <span className="text-white fw-bold"> Nguyễn Mạnh Dũng</span>

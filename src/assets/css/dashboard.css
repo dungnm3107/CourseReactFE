@@ -1,0 +1,15 @@
+.dashboard-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    flex: 1 1 300px; /* Adjusts the card size */
+    min-width: 250px; /* Minimum width for responsiveness */
+  }

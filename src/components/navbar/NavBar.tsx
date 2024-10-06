@@ -11,7 +11,12 @@ interface NavBarProps {
   onOpenSignUpModal: () => void;
 }
 
-export function NavBar({ onOpenLoginModal, onOpenSignUpModal, avatar }: NavBarProps & { avatar: string }) {
+export function NavBar({
+  onOpenLoginModal,
+  onOpenSignUpModal,
+  avatar,
+  role
+}: NavBarProps & { avatar: string, role: string }) {
   const { isLoggedIn } = useAuth();
   const logout = useLogout();
 
@@ -64,28 +69,6 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal, avatar }: NavBarPr
               <NavLink className="nav-link fw-bold" to="/about">
                 Giới thiệu
               </NavLink>
-            </li>
-            <li className="nav-item dropdown dropdown-hover">
-              <a
-                className="nav-link dropdown-toggle fw-bold"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Khóa Học
-              </a>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link fw-bold" to={"/policy"}>
-                Bài Viết
-              </Link>
-            </li>
-
-            <li className="nav-item">
-              <Link className="nav-link fw-bold" to={"/policy"}>
-                Chính sách
-              </Link>
             </li>
           </ul>
           {/* <!-- Left links --> */}
@@ -188,11 +171,13 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal, avatar }: NavBarPr
                     Viết blog
                   </Link>
                 </li>
-                <li>
-                  <Link className="dropdown-item" to="">
-                    Trang quản lý
-                  </Link>
-                </li>
+                {role === "ADMIN" && (
+                  <li>
+                    <Link className="dropdown-item" to="/admin">
+                      Trang quản lý
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Button
                     className="dropdown-item"

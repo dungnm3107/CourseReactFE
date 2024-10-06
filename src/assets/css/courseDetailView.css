@@ -1,0 +1,60 @@
+.course-detail-view {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.content-container {
+  display: flex;
+  gap: 30px;
+}
+
+.video-container {
+  flex: 1;
+  max-width: 70%;
+}
+
+.chapters-container {
+  width: 30%;
+  position: sticky;
+  top: 20px;
+}
+
+.chapter {
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+}
+
+.chapter-title {
+  font-size: 20px;
+  color: #007bff;
+  margin-bottom: 10px;
+}
+
+.lessons-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.lesson-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.play-icon {
+  color: #fa9200;
+  margin-right: 10px;
+}

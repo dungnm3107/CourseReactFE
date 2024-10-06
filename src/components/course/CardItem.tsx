@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { BASE_API_URL } from '../../constants/Constants';
 
 interface Course {
   id: number;
@@ -23,13 +24,13 @@ export default function CardItem({ course }: CardItemProps) {
         <div className="card-body">
           <img
             style={{ height: "200px", borderRadius: "16px", objectFit: "cover" }}
-            src={course.cover || "https://via.placeholder.com/150"}
+            src={`${BASE_API_URL}${course.cover}`|| "https://via.placeholder.com/150"}
             className="card-img-top"
             alt={course.title}
           />
           <h5 className="card-title mt-2 fw-bold" style={{ color: "black" }}>{course.title}</h5>
           <p className="card-text fw-bold">
-            <span style={{ color: "#DC143C" }}>{course.coursePrice.toLocaleString()}đ</span>
+            <span style={{ color: "#DC143C" }}>{course.coursePrice.toLocaleString('vi-VN')}đ</span>
           </p>
         </div>
       </div>

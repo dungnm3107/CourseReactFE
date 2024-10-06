@@ -1,0 +1,2 @@
+trang quản lý: crud chapter. lesson
+trang user, - tìm kiếm, xử lý giao diện đăng kí khóa học pro, thêm mới video cho lesson, thanh toán, thông báo, hiển thị các khóa học của user đó

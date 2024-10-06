@@ -11,7 +11,7 @@ import { useAuth } from '../../service/AuthContext';
 
 
 const Profile: React.FC = () => {
-  const [userData, setUserData] = useState({ fullName: '', avatar: '' });
+  const [userData, setUserData] = useState({ fullName: '', avatar: '', role: '' });
   const { isLoggedIn, checkLoginStatus } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +24,8 @@ const Profile: React.FC = () => {
         });
         setUserData({
           fullName: response.data.fullName,
-          avatar: response.data.avatar
+          avatar: response.data.avatar,
+          role: response.data.listRoles[0].roleName
         });
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -44,21 +45,21 @@ const Profile: React.FC = () => {
     return null; // or a loading spinner
   }
   return (
-    <MainLayout onOpenLoginModal={() => {}} onOpenSignUpModal={() => {}} avatar={userData.avatar}>
+    <MainLayout onOpenLoginModal={() => {}} onOpenSignUpModal={() => {}} avatar={userData.avatar} role={userData.role}>
       <Container fluid className="p-0">
         <div className="profile-cover position-relative">
           <img 
             src={imgbg} 
             alt="Cover" 
             className="img-fluid w-100" 
-            style={{ height: '200px', objectFit: 'cover' }} 
+            style={{ height: '350px', objectFit: 'cover' }} 
           />
-          <div className="position-absolute d-flex align-items-center" style={{ left: '20px', bottom: '10px' }}>
+          <div className="position-absolute d-flex align-items-center" style={{ left: '20px', bottom:'10px' }}> 
             <Avatar
               src={userData.avatar || "/path/to/default/avatar.jpg"}
               sx={{ width: 80, height: 80, border: '3px solid white' }}
             />
-            <h2 className="ms-3 mb-0 style={{ color: 'black' }}">{userData.fullName}</h2>
+         <h2 className="ms-3 mb-0" style={{ color: 'black', marginTop: '40px' }}>{userData.fullName}</h2> 
           </div>
         </div>
         <Container>

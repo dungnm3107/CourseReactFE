@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Course from "../../components/slide/Course";
 import CardList from "../../components/course/CardList";
 import CardListPro from "../../components/course/CardListPro";
+import CardListVideo from "../../components/course/CardListVideo";
 import MainLayout from "../../components/layout/MainLayout";
 import LoginModal from "../SignIn/LoginModal";
 import SignUpModal from "../SignUp/SignUpModal";
@@ -13,6 +14,7 @@ export default function Home() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const [avatar, setAvatar] = useState("");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -27,7 +29,11 @@ export default function Home() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
+      console.log("user data:", response.data);
+      console.log("role:", response.data.listRoles[0].roleName);
       setAvatar(response.data.avatar);
+      setRole(response.data.listRoles[0].roleName);
+      
     } catch (error) {
       console.error('Error fetching user avatar:', error);
     }
@@ -51,6 +57,7 @@ export default function Home() {
   return (
     <MainLayout
       avatar={avatar}
+      role={role}
       isBlurred={isBlurred}
       onOpenLoginModal={handleOpenLoginModal}
       onOpenSignUpModal={handleOpenSignUpModal}
@@ -58,6 +65,7 @@ export default function Home() {
       <Course />
       <CardListPro />
       <CardList />
+      <CardListVideo />
       <LoginModal
         open={isLoginModalOpen}
         onClose={handleCloseLoginModal}

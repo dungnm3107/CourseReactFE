@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CardItemFree from "./CardItemFree";
 import axiosInstance from "../../config/axios";
 import { Link } from "react-router-dom";

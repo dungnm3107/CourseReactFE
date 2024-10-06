@@ -5,6 +5,8 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import Accordion from "./Accordion";
 import axiosInstance from "../../config/axios";
 import { useParams } from "react-router-dom";
+import { useAuth } from "../../service/AuthContext";
+
 interface Course {
   id: number;
   title: string;
@@ -25,6 +27,8 @@ export default function CardDetail() {
   const { id } = useParams<{ id: string }>();
   const [course, setCourse] = useState<Course | null>(null);
   const [totalLessons, setTotalLessons] = useState<number>(0);
+  const { avatar, role } = useAuth();
+  
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -86,7 +90,7 @@ export default function CardDetail() {
           <Accordion />
         </div>
         <div className="col-lg-4">
-          <CardDetailRight totalLessons={totalLessons} />
+        <CardDetailRight totalLessons={totalLessons} courseId={course.id} avatar={avatar} role={role} />
         </div>
       </div>
     </div>

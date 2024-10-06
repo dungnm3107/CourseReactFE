@@ -1,6 +1,6 @@
 .profile-cover {
     position: relative;
-    height: 300px;
+    height: 400px;
     overflow: hidden;
   }
   
@@ -27,4 +27,7 @@
     color: white;
     font-size: 24px;
     border-radius: 16px;
+  }
+  .container{
+    margin-top: 40px;
   }

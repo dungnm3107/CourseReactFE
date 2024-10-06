@@ -1,0 +1,75 @@
+.container-content {
+  width: 100%; /* Chiếm toàn bộ chiều rộng của trang */
+  text-align: center; /* Giữ căn giữa nội dung */
+  margin-top: 20px; /* Khoảng cách phía trên */
+  padding: 0 20px; /* Thêm padding nhỏ để tránh đụng rìa màn hình */
+  box-sizing: border-box; /* Đảm bảo padding không làm thay đổi kích thước phần tử */
+}
+
+h1 {
+  font-size: 34px; /* Giữ kích thước font */
+  font-weight: bold;
+  margin-bottom: 20px; /* Khoảng cách dưới heading */
+}
+
+.table-container {
+  width: 90%; /* Giữ bảng rộng 90% */
+  margin: 0 auto; /* Căn giữa bảng */
+  overflow-x: auto; /* Thêm cuộn ngang nếu bảng lớn hơn container */
+}
+
+.MuiTablePagination-root {
+  display: flex;
+  justify-content: center; /* Căn giữa phần phân trang */
+  align-items: center;
+}
+
+.MuiTablePagination-toolbar {
+  justify-content: center; /* Căn giữa pagination */
+  gap: 10px; /* Thêm khoảng cách giữa các phần tử pagination */
+}
+
+.MuiTable-root {
+  table-layout: fixed; /* Giữ bảng cố định kích thước */
+  width: 100%;
+  margin-bottom: 20px; /* Khoảng cách dưới bảng */
+  min-width: 800px; /* Đặt chiều rộng tối thiểu cho bảng */
+  max-width: 2000px; /* Đặt chiều rộng tối đa cho bảng */
+  border-collapse: collapse; /* Gộp viền các ô bảng */
+}
+
+.MuiTableCell-root {
+  text-align: center; /* Căn giữa nội dung ô */
+  word-wrap: break-word; /* Ngắt dòng nếu nội dung quá dài */
+  padding: 10px; /* Khoảng cách bên trong ô */
+  border: 1px solid #ddd; /* Viền ô */
+}
+
+.modal-box {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end; /* Di chuyển nút sang rìa phải */
+  margin-top: 20px;
+  margin-right: 30px;
+  margin-bottom: 10px;;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff; /* Màu nền cho nút */
+  color: white; /* Màu chữ */
+  border: none; /* Loại bỏ viền */
+  border-radius: 5px; /* Bo tròn nút */
+  cursor: pointer; /* Thêm con trỏ chỉ tay khi hover */
+}
+
+button:hover {
+  background-color: #0056b3; /* Đổi màu khi hover */
+}

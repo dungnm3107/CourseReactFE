@@ -64,6 +64,7 @@
   
   .box a {
     font-size: 14px;
+    font-weight: bold;
   }
   .input-group{
    margin-right: 150px;

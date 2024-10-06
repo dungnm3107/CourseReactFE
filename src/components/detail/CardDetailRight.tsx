@@ -6,11 +6,21 @@ import {
   faFilm,
   faGauge,
 } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 interface CardDetailRightProps {
   totalLessons: number;
+  courseId: number; // Thêm courseId vào props
+  avatar: string; 
+  role: string;
 }
-export default function CardDetailRight({ totalLessons }: CardDetailRightProps) {
+
+export default function CardDetailRight({
+  totalLessons,
+  courseId
+}: CardDetailRightProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="row">
       <div className="col-12 mx-3">
@@ -44,6 +54,7 @@ export default function CardDetailRight({ totalLessons }: CardDetailRightProps) 
       </div>
       <div className="col-12 d-flex justify-content-center mx-3 mt-2">
         <button
+          onClick={() => navigate(`/course-detail-view/${courseId}`)} // Replace courseId with the actual course ID
           style={{
             color: "white",
             backgroundColor: "#3366cc",
@@ -52,7 +63,7 @@ export default function CardDetailRight({ totalLessons }: CardDetailRightProps) 
             height: "40px",
             fontSize: "15px",
           }}
-          className="btn fw-bold  mx-3"
+          className="btn fw-bold mx-3"
         >
           ĐĂNG KÍ HỌC
         </button>
@@ -60,10 +71,10 @@ export default function CardDetailRight({ totalLessons }: CardDetailRightProps) 
 
       <div className="col-12 d-flex justify-content-center mt-4">
         <ul>
-          <li className="list-group-item">
+          {/* <li className="list-group-item">
             <FontAwesomeIcon icon={faGauge} />
             <span className="mx-2">Trình Độ Cơ Bản</span>
-          </li>
+          </li> */}
           <li className="list-group-item">
             <FontAwesomeIcon icon={faFilm} />
             <span className="mx-2">
