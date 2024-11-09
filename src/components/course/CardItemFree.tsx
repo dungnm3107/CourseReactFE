@@ -1,5 +1,4 @@
-import React from "react";
-import { Link } from "react-router-dom";
+
 import { BASE_API_URL } from '../../constants/Constants';
 
 interface Course {

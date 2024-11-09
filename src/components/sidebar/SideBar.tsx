@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHouse,
   faNewspaper,
-  faPen,
-  faPlus,
   faRoad,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
@@ -18,10 +16,7 @@ export default function SideBar() {
     setActiveBox(activeBox === index ? null : index);
   };
 
-  const toggleDropdown = (index: any) => {
-    setActiveBox(activeBox === index ? null : index);
-  };
-
+ 
   console.log(activeBox);
 
   return (

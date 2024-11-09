@@ -2,12 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Button,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TablePagination,
   Modal,
   TextField,
@@ -32,7 +26,7 @@ interface Lesson {
 }
 
 const LessonManagement: React.FC = () => {
-  const { courseId, chapterId } = useParams(); // Lấy ID khóa học và chương từ URL
+  const { chapterId } = useParams(); // Lấy  chương từ URL
   const { avatar, role } = useAuth();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [page, setPage] = useState(0);

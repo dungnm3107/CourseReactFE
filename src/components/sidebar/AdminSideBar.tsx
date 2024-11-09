@@ -7,10 +7,9 @@ import "../../assets/css/adminSideBar.css";
 
 interface AdminSideBarProps {
   isOpen: boolean;
-  toggleSidebar: () => void;
 }
 
-const AdminSideBar: React.FC<AdminSideBarProps> = ({ isOpen, toggleSidebar }) => {
+const AdminSideBar: React.FC<AdminSideBarProps> = ({ isOpen }) => {
   return (
     <div className={`admin-sidebar-container ${isOpen ? 'open' : 'closed'}`}>
       <div className="admin-sidebar-content">

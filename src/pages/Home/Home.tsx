@@ -12,10 +12,7 @@ import axiosInstance from "../../config/axios";
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
-  const [avatar, setAvatar] = useState("");
-  const [role, setRole] = useState("");
-
+  const { isLoggedIn } = useAuth();
   useEffect(() => {
     if (isLoggedIn) {
       fetchUserAvatar();
@@ -31,9 +28,6 @@ export default function Home() {
       });
       console.log("user data:", response.data);
       console.log("role:", response.data.listRoles[0].roleName);
-      setAvatar(response.data.avatar);
-      setRole(response.data.listRoles[0].roleName);
-      
     } catch (error) {
       console.error('Error fetching user avatar:', error);
     }

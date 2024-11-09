@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CardItem from "./CardItem";
 import axiosInstance from "../../config/axios";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../service/AuthContext";
 import { useNavigate } from "react-router-dom";
 

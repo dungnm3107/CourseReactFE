@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import CardItemFree from "./CardItemFree";
 import axiosInstance from "../../config/axios";
-import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../service/AuthContext';
 
@@ -16,7 +15,6 @@ interface Course {
 export default function CardList(){
   const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     const fetchCourses = async () => {

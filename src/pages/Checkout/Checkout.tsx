@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Sử dụng useNavigate để điều hướng
+import  { useEffect, useState } from "react";
+import {  useNavigate } from "react-router-dom"; // Sử dụng useNavigate để điều hướng
 import axiosInstance from "../../config/axios";
 import { useAuth } from "../../service/AuthContext";
 import "../../assets/css/checkout.css";
@@ -24,8 +24,8 @@ export default function Checkout() {
   console.log("Order ID from URL nmd:", orderId);
   const [order, setOrder] = useState<Order | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
-  const { userId, name, email } = useAuth();
-  const navigate = useNavigate();
+  const { name, email } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
