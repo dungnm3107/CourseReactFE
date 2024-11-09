@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faUser, faBook,faMoneyBill } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faUser, faBook,faCoins } from '@fortawesome/free-solid-svg-icons';
 import logo from "../../assets/images/logoCourse.png"; 
 import "../../assets/css/adminSideBar.css";
 
@@ -36,7 +36,7 @@ const AdminSideBar: React.FC<AdminSideBarProps> = ({ isOpen }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <FontAwesomeIcon icon={faMoneyBill} className="sidebar-icon" />
+          <FontAwesomeIcon icon={faCoins} className="sidebar-icon" />
           <span>Quản lý giao dịch</span>
         </Link>
       </div>

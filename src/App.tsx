@@ -5,7 +5,7 @@ import { GOOGLE_CLIENT_ID } from "./constants/Constants";
 import ReactGA from 'react-ga4';
 import React from 'react';  
 
-const MEASUREMENT_ID = "G-TP6DLB1V9Q";
+const MEASUREMENT_ID = "G-JLYH0CB9NF";
 
 function App() {
   ReactGA.initialize([
