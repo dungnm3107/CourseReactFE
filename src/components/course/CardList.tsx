@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import CardItemFree from "./CardItemFree";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../service/AuthContext';
 
 interface Course {
   id: number;

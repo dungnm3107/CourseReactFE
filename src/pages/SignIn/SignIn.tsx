@@ -45,10 +45,7 @@ export default function SignIn({
       password: data.get("password"),
     };
 
-    const errorMessages: { [key: string]: string } = {
-      userName: "Vui lòng nhập tên tài khoản.",
-      password: "Vui lòng nhập mật khẩu.",
-    };
+
 // check
     if (!loginData.userName || !loginData.password) {
       const missingFields = [];

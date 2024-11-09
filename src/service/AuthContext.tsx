@@ -2,12 +2,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 import axiosInstance from '../../src/config/axios';
 
 
-interface Lesson {
-  id: number;
-  title: string;
-  lessonSequence: number;
-  videoUrl: string;
-}
+
 interface AuthContextType {
   avatar: string;
   role: string; 

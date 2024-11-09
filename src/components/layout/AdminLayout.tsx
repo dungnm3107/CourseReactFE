@@ -30,7 +30,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       />
       <div className="admin-layout-content-wrapper">
         <div className={`admin-layout-sidebar-container ${isSidebarOpen ? 'open' : 'closed'}`}>
-          <AdminSideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          <AdminSideBar isOpen={isSidebarOpen}/>
         </div>
         <main className={`admin-content ${isSidebarOpen ? '' : 'collapsed'}`}>
           {children}
