@@ -165,9 +165,10 @@ const UserManagement: React.FC = () => {
     setUserIdToDelete(null);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
+  
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>

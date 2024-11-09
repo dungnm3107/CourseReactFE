@@ -7,12 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import "../../assets/css/courseManagement.css";
 import { BASE_API_URL } from "../../constants/Constants";
-import {
-  Modal,
-  Box,
-  Button,
-  TablePagination,
-} from "@mui/material";
+import { Modal, Box, Button, TablePagination } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 interface Course {
   id: number;
@@ -351,6 +346,20 @@ const CourseManagement: React.FC = () => {
         setIsUploading(false); // Kết thúc quá trình upload
       }
     }
+  };
+
+  const handleChangePage = (
+    _: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   //xem video
@@ -770,13 +779,10 @@ const CourseManagement: React.FC = () => {
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
               count={courses.length}
-              rowsPerPage={rowsPerPage}
               page={page}
-              onPageChange={(event, newPage) => setPage(newPage)}
-              onRowsPerPageChange={(event) => {
-                setRowsPerPage(parseInt(event.target.value, 10));
-                setPage(0);
-              }}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </div>
           {/* modal view video  */}
