@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import CardItemFree from "./CardItemFree";
 import axiosInstance from "../../config/axios";
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../service/AuthContext';
 
 interface Course {
   id: number;
@@ -11,8 +13,10 @@ interface Course {
   cover: string;
   courseType: "FREE" | "PAID";
 }
-export default function CardList() {
+export default function CardList(){
   const [courses, setCourses] = useState<Course[]>([]);
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -42,9 +46,13 @@ export default function CardList() {
     fetchCourses();
   }, []);
 
+  const handleCourseClick = (courseId: number) => {
+      navigate(`/course-detail/${courseId}`);
+  };
+
   return (
     <>
-      <div style={{ height: "44px" }}>
+      <div style={{ height: "44px", marginBottom: "10px"  }}>
         <h6 className="pt-3">
           <span
             style={{ fontSize: "28px", color: "black", fontWeight: "bold" }}
@@ -57,9 +65,9 @@ export default function CardList() {
         {Array.isArray(courses) && courses.length > 0 ? (
           courses.map((course) => (
             <div key={course.id} className="col-sm-6 col-md-4 col-lg-3 mt-3">
-              <Link to={`/course-detail/${course.id}`}>
-                <CardItemFree course={course} />
-              </Link>
+              <div onClick={() => handleCourseClick(course.id)} style={{ cursor: 'pointer' }}>
+              <CardItemFree course={course} />
+            </div>
             </div>
           ))
         ) : (

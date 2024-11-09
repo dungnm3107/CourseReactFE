@@ -6,12 +6,6 @@ import {
   Modal,
   Box,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TablePagination,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
@@ -151,18 +145,17 @@ const UserManagement: React.FC = () => {
         email: "",
         password: "",
         phone: "",
-      }); 
-      setOpenModal(false); 
-      toast.success("Thêm người dùng thành công!"); 
+      });
+      setOpenModal(false);
+      toast.success("Thêm người dùng thành công!");
     } catch (error) {
       console.error("Error adding user:", error);
       if (axios.isAxiosError(error) && error.response) {
-  
         const errorMessage =
           error.response.data.message || "Thêm người dùng thất bại!";
-        toast.error(errorMessage); 
+        toast.error(errorMessage);
       } else {
-        toast.error("Thêm người dùng thất bại!"); 
+        toast.error("Thêm người dùng thất bại!");
       }
     }
   };
@@ -186,11 +179,15 @@ const UserManagement: React.FC = () => {
     <>
       <AdminLayout avatar={avatar} role={role}>
         <div className="container-content">
-          <h1>Quản lý người dùng</h1>
-          <div className ="button-container"> 
-          <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
-          Thêm mới user
-          </Button>
+          <h1>QUẢN LÝ NGƯỜI DÙNG</h1>
+          <div className="button-container-user">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setOpenModal(true)}
+            >
+              Thêm mới user
+            </Button>
           </div>
 
           <Modal open={openModal} onClose={() => setOpenModal(false)}>
@@ -323,51 +320,53 @@ const UserManagement: React.FC = () => {
             </Box>
           </Modal>
 
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">ID</TableCell>
-                  <TableCell align="center">Full Name</TableCell>
-                  <TableCell align="center">Username</TableCell>
-                  <TableCell align="center">Email</TableCell>
-                  <TableCell align="center">Phone</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div className="table-container-user">
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Full Name</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {users
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell align="center">{user.id}</TableCell>
-                      <TableCell align="center">{user.fullName}</TableCell>
-                      <TableCell align="center">{user.userName}</TableCell>
-                      <TableCell align="center">{user.email}</TableCell>
-                      <TableCell align="center">{user.phone}</TableCell>
-                      <TableCell align="center">
+                    <tr key={user.id}>
+                      <td>{user.id}</td>
+                      <td>{user.fullName}</td>
+                      <td>{user.userName}</td>
+                      <td>{user.email}</td>
+                      <td>{user.phone}</td>
+                      <td>
                         <Button
                           onClick={() => handleDeleteUser(user.id)}
                           sx={{ color: "red" }}
                         >
                           <DeleteIcon sx={{ color: "red" }} />
                         </Button>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
 
-          <TablePagination
-            rowsPerPageOptions={[7, 10, 25]}
-            component="div"
-            count={users.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          <div className="pagination-container">
+            <TablePagination
+              rowsPerPageOptions={[7, 10, 25]}
+              component="div"
+              count={users.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </div>
         </div>
       </AdminLayout>
       <ToastContainer />

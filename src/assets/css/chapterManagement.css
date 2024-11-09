@@ -1,62 +1,110 @@
 .container-content {
-    width: 100%;
-    text-align: center;
-    margin-top: 20px;
-    padding: 0 20px;
-    box-sizing: border-box;
-  }
-  
-  h1 {
-    font-size: 34px;
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-  
-  .table-container {
-    width: 90%;
-    margin: 0 auto;
-    overflow-x: auto;
-  }
-  
-  .MuiTablePagination-root {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .MuiTable-root {
-    table-layout: fixed;
-    width: 100%;
-    margin-bottom: 20px;
-    min-width: 800px;
-    max-width: 2000px;
-    border-collapse: collapse;
-  }
-  
-  .MuiTableCell-root {
-    text-align: center;
-    word-wrap: break-word;
-    padding: 10px;
-    border: 1px solid #ddd;
-  }
-  
-  .button-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-    margin-right: 30px;
-    margin-bottom: 10px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 34px;
+  font-weight: bold;
+  margin-bottom: 20px;
+
+}
+
+.chapter-table-container {
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-right: 30px;
+}
+
+.chapter-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border: 1px solid #ddd;
+}
+
+.chapter-table th {
+  background-color: #d7d5d5;
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 2px solid #ddd;
+  border-right: 1px solid #ddd; 
+  white-space: nowrap;
+  font-weight: bold;
+  color: #333;
+}
+
+.chapter-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd; 
+  vertical-align: middle;
+  text-align: center;
+}
+
+.col-id {
+  width: 5%;
+  min-width: 50px;
+}
+
+.col-title {
+  width: 20%;
+  min-width: 150px;
+}
+
+.col-desc {
+  width: 35%;
+  min-width: 200px;
+}
+
+.col-sequence {
+  width: 10%;
+  min-width: 80px;
+}
+
+.col-lessons {
+  width: 10%;
+  min-width: 70px;
+}
+
+.col-actions {
+  width: 20%;
+  min-width: 120px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.chapter-table tbody tr:hover {
+  background-color: #f8f8f8;
+}
+
+.chapter-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+  margin-right: 30px;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

@@ -36,8 +36,6 @@
     .course-detail-content {
       flex-direction: column;
     }
-  
-    .main-content,
     .sidebar-content {
       max-width: 100%;
       width: 100%;
@@ -47,4 +45,18 @@
       position: static;
       margin-top: 20px;
     }
+    .accordion-button:hover {
+      background-color: #9fbddd; /* Change the background color on hover */
+      color: #fff; /* Change the text color on hover */
+    }
+    
+    .accordion-item .accordion-button.collapsed:hover {
+      background-color: #9dadbe; /* Color when collapsed and hovered */
+    }
+    
+    .icon-container:hover .icon-collapsed, 
+    .icon-container:hover .icon-expanded {
+      color: #ff4500; /* Change icon color on hover */
+    }
+    
   }

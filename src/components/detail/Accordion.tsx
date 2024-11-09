@@ -77,8 +77,8 @@ export default function Accordion() {
                   <FontAwesomeIcon icon={faMinus} className="icon-expanded" />
                 </span>
                 <span className="fw-bold">
-                  {chapter.chapterSequence ?? "No sequence"}.{" "}
-                  {chapter.title ?? "No title"}
+                  { "Chương " + chapter.chapterSequence || "No sequence"}.{" "}
+                  {chapter.title || "No title"}
                 </span>
                 <div className="text-right-col ms-auto">
                   <span>{chapter.lessons?.length ?? 0}</span> bài học
@@ -98,8 +98,8 @@ export default function Accordion() {
                         icon={faCirclePlay}
                         style={{ color: "#fa9200" }}
                       />{" "}
-                      <span>{lesson.lessonSequence ?? lessonIndex + 1}. </span>
-                      {lesson.title ?? "No title"}
+                      <span>{"Bài "+ lesson.lessonSequence || lessonIndex + 1}. </span>
+                      {lesson.title || "No title"}
                     </li>
                   ))}
                 </ul>

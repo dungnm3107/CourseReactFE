@@ -22,6 +22,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { GoogleLogin } from "@react-oauth/google";
 
+
 const defaultTheme = createTheme();
 export default function SignIn({
   onSwitchToSignUp,
@@ -32,7 +33,6 @@ export default function SignIn({
 }) {
   const navigate = useNavigate();
   const {checkLoginStatus} = useAuth();
-
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -44,9 +44,30 @@ export default function SignIn({
       userName: data.get("username"),
       password: data.get("password"),
     };
-    
-    console.log("Sending login data:", loginData); // Log the data being sent
-  
+
+    const errorMessages: { [key: string]: string } = {
+      userName: "Vui lòng nhập tên tài khoản.",
+      password: "Vui lòng nhập mật khẩu.",
+    };
+// check
+    if (!loginData.userName || !loginData.password) {
+      const missingFields = [];
+      if (!loginData.userName) missingFields.push("tên tài khoản");
+      if (!loginData.password) missingFields.push("mật khẩu");
+
+      const errorMessage = `Vui lòng nhập ${missingFields.join(" và ")}.`;
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return; 
+    }
+
     try {
       const response = await axios.post(
         `${BASE_API_URL}/api/v1/user/login`,
@@ -60,8 +81,19 @@ export default function SignIn({
       console.log("Login success", response.data);
   
       localStorage.setItem("token", response.data.result.jwtToken);
-    
   
+      // Fetch user profile data after login to get avatar and role
+      const profileResponse = await axios.get(`${BASE_API_URL}/api/v1/user/profile`, {
+        headers: {
+          'Authorization': `Bearer ${response.data.result.jwtToken}`,
+        },
+      });
+  
+      // Save avatar and role to localStorage
+      localStorage.setItem("avatar", profileResponse.data.avatar);
+      localStorage.setItem("role", profileResponse.data.listRoles[0].roleName);
+  
+      // Trigger login status check
       checkLoginStatus();
       onSuccessfulLogin();
       navigate("/");
@@ -92,6 +124,7 @@ export default function SignIn({
       }
     }
   };
+  
 
   const handleGoogleLogin = async (credentialResponse: any) => {
     try {
@@ -99,11 +132,14 @@ export default function SignIn({
         credential: credentialResponse.credential,
       });
       console.log("Google login success", response.data);
-
-      localStorage.setItem("token", response.data);
-
-      checkLoginStatus();
-
+  
+      // Store the token, avatar, and role in local storage
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("avatar", response.data.avatar);
+      localStorage.setItem("role", response.data.role);
+  
+      await checkLoginStatus();
+  
       onSuccessfulLogin();
       navigate("/");
     } catch (error) {
@@ -119,6 +155,7 @@ export default function SignIn({
       });
     }
   };
+  
 
   return (
     <ThemeProvider theme={defaultTheme}>

@@ -1,0 +1,41 @@
+.payment-failed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+.crossmark-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #f44336; /* Red background */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.crossmark {
+    font-size: 40px;
+    color: white; /* White crossmark */
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+p {
+    color: #333;
+    font-size: 16px;
+    max-width: 600px;
+}
+
+p strong {
+    color: #f44336; /* Red for the error message explanation */
+}

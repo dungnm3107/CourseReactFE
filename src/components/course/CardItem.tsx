@@ -19,7 +19,9 @@ export default function CardItem({ course }: CardItemProps) {
   return (
       <div
         className="card card-hover"
-        style={{ borderRadius: "16px" }}
+        style={{ borderRadius: "16px","border":"1px solid #e0e0e0",
+          padding: "0px",
+          boxShadow: '0 4px 8px  rgba(0, 0, 0, 0.3)', }}
       >
         <div className="card-body">
           <img

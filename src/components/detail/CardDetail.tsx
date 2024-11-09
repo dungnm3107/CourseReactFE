@@ -7,6 +7,8 @@ import axiosInstance from "../../config/axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../service/AuthContext";
 
+
+
 interface Course {
   id: number;
   title: string;
@@ -14,6 +16,7 @@ interface Course {
   coursePrice: number;
   cover: string;
   courseType: "FREE" | "PAID";
+  videoUrl: string;
   listChapter: Chapter[];
 }
 interface Chapter {
@@ -61,10 +64,10 @@ export default function CardDetail() {
   }
   console.log("Course state:", course);
   return (
-    <div className="container">
+  
       <div className="row">
         <div className="col-lg-8">
-          <h1>{course.title || "No title available"}</h1>
+          <h1>{"KHÓA HỌC: "+ course.title || "No title available"}</h1>
           <p>{course.description || "No description available"}</p>
           
           <h3>Bạn sẽ học được những gì?</h3>
@@ -90,9 +93,9 @@ export default function CardDetail() {
           <Accordion />
         </div>
         <div className="col-lg-4">
-        <CardDetailRight totalLessons={totalLessons} courseId={course.id} avatar={avatar} role={role} />
+        <CardDetailRight totalLessons={totalLessons} courseId={course.id} videoUrl= {course.videoUrl} avatar={avatar} role={role} coursePrice={course.coursePrice}
+         />
         </div>
-      </div>
     </div>
   );
 }

@@ -52,6 +52,7 @@ const LessonManagement: React.FC = () => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+  const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLessons();
@@ -72,7 +73,21 @@ const LessonManagement: React.FC = () => {
           },
         }
       );
-      setLessons(response.data.result);
+       // Gọi API để lấy presignedUrl cho videoUrl
+    const lessonsWithPresignedUrls = await Promise.all(response.data.result.map(async (lesson: Lesson) => {
+      if (lesson.videoUrl) {
+        const presignedUrlResponse = await axiosInstance.get(`/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(lesson.videoUrl)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        return { ...lesson, videoUrl: presignedUrlResponse.data.url };
+      }
+      return lesson; 
+    }));
+
+      setLessons(lessonsWithPresignedUrls);
     } catch (error) {
       toast.error("Lỗi khi tải dữ liệu bài học!");
       console.error("Error fetching lessons:", error);
@@ -88,10 +103,11 @@ const LessonManagement: React.FC = () => {
     }
 
     try {
-      // Include idChapter in the formData
+    
       const updatedFormData = {
         ...formData,
-        idChapter: parseInt(chapterId ? chapterId : "0"), // Ensure idChapter is correctly set
+        idChapter: parseInt(chapterId ? chapterId : "0"),
+        videoUrl: originalVideoUrl
       };
 
       if (formData.idLesson) {
@@ -209,31 +225,51 @@ const LessonManagement: React.FC = () => {
         const videoUrl = response.data.url;
         console.log("Uploaded video URL: ", videoUrl);
 
+        // Gọi API để lấy presigned URL
+        const presignedUrlResponse = await axiosInstance.get(
+          `/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(videoUrl)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const presignedUrl = presignedUrlResponse.data.url; // URL ký kết
+
+        setOriginalVideoUrl(videoUrl);
         setFormData((prevFormData) => ({
           ...prevFormData,
-          videoUrl: videoUrl,
+          videoUrl: presignedUrl,
         }));
 
         toast.success("Tải video thành công!"); // Thông báo khi video tải lên thành công
-        setIsUploading(false); // Kết thúc quá trình upload
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error uploading video:", error);
-        toast.error("Lỗi khi tải video lên S3!");
-        setIsUploading(false);
+
+        if (error.response && error.response.status === 417) {
+          // Kiểm tra lỗi từ backend (417 Expectation Failed)
+          toast.error(error.response.data); // Hiển thị thông báo lỗi từ backend
+        } else {
+          toast.error("Lỗi khi tải video lên S3!");
+        }
+      } finally {
+        setIsUploading(false); // Kết thúc quá trình upload
       }
     }
   };
+
   //xem video
   const handleVideoPreview = (videoUrl: string) => {
-    console.log("Video URL:", videoUrl); // Thêm dòng này để debug
+    console.log("Video URL in preview:", videoUrl); // Kiểm tra giá trị videoUrl
     setPreviewVideoUrl(videoUrl);
-  };
+};
 
   return (
     <AdminLayout avatar={avatar} role={role}>
       <ToastContainer />
       <div className="container-content">
-        <h1>Quản lý Bài học</h1>
+        <h1>QUẢN LÝ BÀI HỌC</h1>
 
         <div className="button-container">
           <Button variant="contained" color="primary" onClick={handleAddLesson}>
@@ -241,41 +277,39 @@ const LessonManagement: React.FC = () => {
           </Button>
         </div>
 
-        {/* Danh sách Bài học */}
-        <div className="table-container">
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">ID</TableCell>
-                  <TableCell align="center">Tiêu đề</TableCell>
-                  <TableCell align="center">Nội dung</TableCell>
-                  <TableCell align="center">Thứ tự</TableCell>
-                  <TableCell align="center">Video</TableCell>
-                  <TableCell align="center">Hành động</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {lessons.map((lesson) => (
-                  <TableRow key={lesson.idLesson}>
-                    <TableCell align="center">{lesson.idLesson}</TableCell>
-                    <TableCell align="center">{lesson.title}</TableCell>
-                    <TableCell align="center">{lesson.content}</TableCell>
-                    <TableCell align="center">
-                      {lesson.lessonSequence}
-                    </TableCell>
-                    <TableCell align="center">
-                      {lesson.videoUrl ? (
-                        <Button
-                          onClick={() => handleVideoPreview(lesson.videoUrl)}
-                        >
-                          Xem video
-                        </Button>
-                      ) : (
-                        "Chưa có video"
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
+        <div className="lesson-table-container">
+          <table className="lesson-table">
+            <thead>
+              <tr>
+                <th className="col-id">ID</th>
+                <th className="col-title">Tiêu đề</th>
+                <th className="col-content">Nội dung</th>
+                <th className="col-sequence">Thứ tự</th>
+                <th className="col-video">Video</th>
+                <th className="col-actions">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lessons.map((lesson) => (
+                <tr key={lesson.idLesson}>
+                  <td className="col-id">{lesson.idLesson}</td>
+                  <td className="col-title">{lesson.title}</td>
+                  <td className="col-content">{lesson.content}</td>
+                  <td className="col-sequence">{lesson.lessonSequence}</td>
+                  <td className="col-video">
+                    {lesson.videoUrl ? (
+                      <Button
+                        onClick={() => handleVideoPreview(lesson.videoUrl)}
+                        sx={{ color: "blue" }}
+                      >
+                        Xem video
+                      </Button>
+                    ) : (
+                      "Chưa có video"
+                    )}
+                  </td>
+                  <td className="col-actions">
+                    <div className="action-buttons">
                       <IconButton
                         onClick={() => handleEdit(lesson)}
                         sx={{ color: "blue" }}
@@ -288,13 +322,14 @@ const LessonManagement: React.FC = () => {
                       >
                         <Delete />
                       </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        <div className="pagination-container">
         <TablePagination
           component="div"
           count={lessons.length}
@@ -303,6 +338,7 @@ const LessonManagement: React.FC = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+        </div>
         {/* modal them moi hoac chinh sua bai hoc */}
         <Modal open={openModal} onClose={handleCloseModal}>
           <Box
@@ -351,7 +387,7 @@ const LessonManagement: React.FC = () => {
                 <Box
                   sx={{
                     width: "100%",
-                    maxHeight: "400px", // Giới hạn chiều cao của khung video
+                    maxHeight: "400px",
                     overflow: "hidden", // Ẩn nội dung video thừa
                     display: "flex",
                     justifyContent: "center",
@@ -362,8 +398,9 @@ const LessonManagement: React.FC = () => {
                   <video
                     src={formData.videoUrl}
                     controls
+                    preload="metadata" // tải dữ liệu trước để view cho tối ưu, thay vì tải toàn bộ
                     style={{
-                      maxWidth: "100%", // Chiều rộng tối đa là 100% so với khung
+                      maxWidth: "100%",
                       height: "auto", // Tự động điều chỉnh chiều cao để giữ tỷ lệ
                     }}
                   />
@@ -436,24 +473,42 @@ const LessonManagement: React.FC = () => {
             sx={{
               padding: 4,
               maxWidth: 1500,
-              width: 1200, 
-              height: 800, 
+              width: 1200,
+              height: 700,
               margin: "auto",
               bgcolor: "background.paper",
               borderRadius: 2,
-              display: "flex", 
+              display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
+              backgroundColor: "#e0e0e0", 
+              marginTop: "2%",
             }}
           >
             {previewVideoUrl ? (
-              <video
-                src={previewVideoUrl}
-                controls
-                autoPlay
-                style={{ width: "100%", height: "100%" }} 
-              />
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#e0e0e0", 
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <video
+                  src={previewVideoUrl}
+                  controls
+                  preload="metadata"
+                  style={{
+                    width: "90%", 
+                    height: "90%",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)", // Bóng đổ cho video để làm nổi bật
+                  }}
+                />
+              </div>
             ) : (
               <p>Không thể tải video</p>
             )}

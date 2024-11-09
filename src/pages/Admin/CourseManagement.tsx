@@ -11,12 +11,6 @@ import {
   Modal,
   Box,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TablePagination,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +21,7 @@ interface Course {
   coursePrice: number;
   cover: string;
   courseType: "FREE" | "PAID";
+  videoUrl: string;
   createdAt: string;
   createBy: string;
   idUserCreate: number | null;
@@ -43,6 +38,7 @@ const CourseManagement: React.FC = () => {
     coursePrice: 0,
     cover: "",
     courseType: "FREE",
+    videoUrl: "",
     createdAt: "",
     createBy: "",
   });
@@ -55,7 +51,11 @@ const CourseManagement: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editCourse, setEditCourse] = useState<Course | null>(null);
   const [openPreviewModal, setOpenPreviewModal] = useState(false);
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+  const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCourses();
@@ -63,8 +63,26 @@ const CourseManagement: React.FC = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await axiosInstance.get("/api/v1/course/all");
-      setCourses(response.data.result);
+      const response = await axiosInstance.get("/api/v1/course/all", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const coursesWithPresignedUrls = await Promise.all(
+        response.data.result.map(async (course: Course) => {
+          // Gọi API để lấy presignedUrl cho video
+          if (course.videoUrl) {
+            const presignedUrlResponse = await axiosInstance.get(
+              `/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(
+                course.videoUrl
+              )}`
+            );
+            return { ...course, videoUrl: presignedUrlResponse.data.url }; // Cập nhật videoUrl thành presignedUrl
+          }
+          return course; // Nếu không có videoUrl, trả về course gốc
+        })
+      );
+      setCourses(coursesWithPresignedUrls);
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
@@ -74,6 +92,8 @@ const CourseManagement: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
+      const imageUrl = URL.createObjectURL(e.target.files[0]); // Tạo URL tạm thời cho ảnh
+      setSelectedImage(imageUrl); // Cập nhật trạng thái với URL ảnh
     }
   };
 
@@ -99,7 +119,8 @@ const CourseManagement: React.FC = () => {
             },
           }
         );
-        coverUrl = uploadResponse.data; 
+        coverUrl = uploadResponse.data;
+        setNewCourse((prev) => ({ ...prev, cover: coverUrl })); // nhận url images từ server
       } catch (error) {
         console.error("Error uploading image:", error);
         toast.error("Tải ảnh lên không thành công!");
@@ -111,7 +132,12 @@ const CourseManagement: React.FC = () => {
       // Gửi thông tin khóa học và URL ảnh bìa lên server
       await axiosInstance.post(
         "/api/v1/course/save",
-        { ...newCourse, idUserCreate: userId, cover: coverUrl },
+        {
+          ...newCourse,
+          idUserCreate: userId,
+          cover: coverUrl,
+          videoUrl: originalVideoUrl,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -126,6 +152,7 @@ const CourseManagement: React.FC = () => {
         coursePrice: 0,
         cover: "",
         courseType: "FREE",
+        videoUrl: "",
         createdAt: "",
         createBy: "",
       });
@@ -179,6 +206,7 @@ const CourseManagement: React.FC = () => {
           }
         );
         coverUrl = uploadResponse.data; // URL returned from the API
+        setEditCourse((prev) => ({ ...prev!, cover: coverUrl }));
       } catch (error) {
         console.error("Error uploading image:", error);
         toast.error("Tải ảnh bìa mới không thành công!");
@@ -195,6 +223,7 @@ const CourseManagement: React.FC = () => {
             idCourse: editCourse.id, // Include the course ID
             idUserUpdate: userId, // User ID
             cover: coverUrl, // Updated cover URL
+            videoUrl: originalVideoUrl,
           },
           {
             headers: {
@@ -262,12 +291,79 @@ const CourseManagement: React.FC = () => {
     setSelectedImage(null);
   };
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsUploading(true); // Bắt đầu quá trình upload
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+
+        //  Gửi yêu cầu tải lên video
+        const uploadResponse = await axiosInstance.post(
+          "/api/v1/video/upload",
+          uploadFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const videoUrl = uploadResponse.data.url; // URL thuần của video
+        console.log("Uploaded video URL: ", videoUrl);
+
+        //  Gọi API để lấy presigned URL
+        const presignedUrlResponse = await axiosInstance.get(
+          `/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(
+            videoUrl
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const presignedUrl = presignedUrlResponse.data.url; // URL ký kết
+
+        // Cập nhật URL video
+        if (openEditModal && editCourse) {
+          setOriginalVideoUrl(videoUrl);
+          setEditCourse((prevEditCourse) => ({
+            ...prevEditCourse!,
+            videoUrl: presignedUrl, // Cập nhật videoUrl cho editCourse
+          }));
+        } else {
+          setOriginalVideoUrl(videoUrl);
+          setNewCourse((prevNewCourse) => ({
+            ...prevNewCourse,
+            videoUrl: presignedUrl, // Cập nhật videoUrl cho newCourse
+          }));
+        }
+
+        toast.success("Tải video thành công!"); // Thông báo khi video tải lên thành công
+      } catch (error: any) {
+        console.error("Error uploading video:", error);
+        toast.error("Lỗi khi tải video lên S3!");
+      } finally {
+        setIsUploading(false); // Kết thúc quá trình upload
+      }
+    }
+  };
+
+  //xem video
+  const handleVideoPreview = (videoUrl: string) => {
+    console.log("Video URL:", videoUrl); // Thêm dòng này để debug
+    setPreviewVideoUrl(videoUrl);
+  };
   return (
     <>
       <AdminLayout avatar={avatar} role={role}>
         <div className="container-content">
-          <h1>Quản lý khóa học</h1>
-          <div className="button-container">
+          <h1>QUẢN LÝ KHÓA HỌC</h1>
+          <div className="course-button-container">
             <Button
               variant="contained"
               color="primary"
@@ -279,6 +375,7 @@ const CourseManagement: React.FC = () => {
           {/* Add new Course Modal */}
           <Modal open={openModal} onClose={() => setOpenModal(false)}>
             <Box
+              className="modal-box"
               sx={{
                 padding: 4,
                 maxWidth: 600,
@@ -332,6 +429,21 @@ const CourseManagement: React.FC = () => {
                     required
                   />
                 </div>
+                {/* Hiển thị ảnh đã chọn */}
+                {selectedImage && (
+                  <div className="form-group">
+                    <label>Xem ảnh bìa</label>
+                    <img
+                      src={selectedImage}
+                      alt="Ảnh bìa đã chọn"
+                      style={{
+                        width: "200px",
+                        height: "auto",
+                        marginBottom: "10px",
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="form-group">
                   <label htmlFor="courseType">Loại khóa học</label>
                   <select
@@ -345,16 +457,60 @@ const CourseManagement: React.FC = () => {
                     <option value="PAID">Trả phí</option>
                   </select>
                 </div>
-                <Button type="submit" variant="contained" color="primary">
-                  Save
+
+                <div className="form-group">
+                  <label htmlFor="video">Chọn Video</label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoUpload} // Hàm xử lý khi chọn video
+                  />
+                </div>
+                {/* Video Preview Section */}
+                {newCourse.videoUrl ? (
+                  <>
+                    <label>Xem Video</label>
+                    <br />
+                    <Box
+                      sx={{
+                        width: "100%",
+                        maxHeight: "400px",
+                        overflow: "hidden", // Ẩn nội dung video thừa
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <video
+                        src={newCourse.videoUrl}
+                        controls
+                        preload="metadata" // tải dữ liệu trước để view cho tối ưu
+                        style={{
+                          maxWidth: "100%",
+                          height: "auto", // Tự động điều chỉnh chiều cao để giữ tỷ lệ
+                        }}
+                      />
+                    </Box>
+                  </>
+                ) : (
+                  <p>Chưa có video. Hãy tải lên một video mới.</p>
+                )}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={isUploading || !newCourse.videoUrl} // Chỉ cho lưu khi upload xong và có URL video
+                >
+                  {isUploading ? "Đang tải video..." : "Lưu"}
                 </Button>
               </form>
             </Box>
           </Modal>
-
           {/* Edit Course Modal */}
           <Modal open={openEditModal} onClose={() => setOpenEditModal(false)}>
             <Box
+              className="modal-box"
               sx={{
                 padding: 4,
                 maxWidth: 600,
@@ -404,15 +560,15 @@ const CourseManagement: React.FC = () => {
                   <div className="form-group">
                     <label htmlFor="cover">Ảnh bìa hiện tại</label>
                     <div>
-                      {`${BASE_API_URL}${editCourse.cover}` && ( 
+                      {`${BASE_API_URL}${editCourse.cover}` && (
                         <img
-                          src={`${BASE_API_URL}${editCourse.cover}`} 
+                          src={`${BASE_API_URL}${editCourse.cover}`}
                           alt="Ảnh bìa hiện tại"
                           style={{
                             width: "200px",
                             height: "auto",
                             marginBottom: "10px",
-                          }} 
+                          }}
                         />
                       )}
                     </div>
@@ -438,21 +594,46 @@ const CourseManagement: React.FC = () => {
                       <option value="PAID">Trả phí</option>
                     </select>
                   </div>
-                  <Button type="submit" variant="contained" color="primary">
-                    Cập nhật
+                  <div className="form-group">
+                    <label htmlFor="video">Video hiện tại</label>
+                    {editCourse.videoUrl ? (
+                      <video
+                        src={editCourse.videoUrl}
+                        controls
+                        style={{ width: "100%", marginTop: "10px" }}
+                      />
+                    ) : (
+                      <p>Chưa có video.</p>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="new-video">Chọn Video mới</label>
+                    <input
+                      type="file"
+                      id="new-video"
+                      accept="video/*"
+                      onChange={handleVideoUpload} // Hàm xử lý khi chọn video mới
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={isUploading || !editCourse.videoUrl} // Chỉ cho lưu khi upload xong và có URL video
+                  >
+                    {isUploading ? "Đang tải video..." : "Cập nhật"}
                   </Button>
                 </form>
               )}
             </Box>
           </Modal>
-
           {/* Delete Course Modal */}
-
           <Modal
             open={openConfirmModal}
             onClose={() => setOpenConfirmModal(false)}
           >
             <Box
+              className="modal-box"
               sx={{
                 padding: 4,
                 maxWidth: 400,
@@ -500,94 +681,155 @@ const CourseManagement: React.FC = () => {
                 <img
                   src={selectedImage}
                   alt="Preview"
-                  style={{ width: "100%", borderRadius: "8px" }} 
+                  style={{ width: "100%", borderRadius: "8px" }}
                 />
               )}
             </Box>
           </Modal>
 
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">ID</TableCell>
-                  <TableCell align="center">Tiêu đề</TableCell>
-                  <TableCell align="center">Mô tả</TableCell>
-                  <TableCell align="center">Giá</TableCell>
-                  <TableCell align="center">Ảnh bìa</TableCell>
-                  <TableCell align="center">Loại khóa học</TableCell>
-                  <TableCell align="center">Ngày tạo</TableCell>
-                  <TableCell align="center">Người tạo</TableCell>
-                  <TableCell align="center">Hành động</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div className="course-table-container">
+            <table className="course-table">
+              <thead>
+                <tr>
+                  <th className="col-id">ID</th>
+                  <th className="col-title">Tiêu đề</th>
+                  <th className="col-desc">Mô tả</th>
+                  <th className="col-price">Giá</th>
+                  <th className="col-type">Loại</th>
+                  <th className="col-cover">Ảnh bìa</th>
+                  <th className="col-video">Video</th>
+                  <th className="col-actions">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
                 {courses
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((course) => (
-                    <TableRow key={course.id}>
-                      <TableCell align="center">{course.id}</TableCell>
-                      <TableCell align="center">{course.title}</TableCell>
-                      <TableCell align="center">{course.description}</TableCell>
-                      <TableCell align="center">
-                        {course.coursePrice}đ
-                      </TableCell>
-                      <TableCell align="center">
-                        <img
-                          src={`${BASE_API_URL}${course.cover}`}
-                          style={{ width: "180px", cursor: "pointer" }}
-                          onClick={() =>
-                            handleImageClick(`${BASE_API_URL}${course.cover}`)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        {course.courseType === "FREE" ? "Miễn phí" : "Trả phí"}
-                      </TableCell>
-
-                      <TableCell align="center">
-                        {new Date(course.createdAt).toLocaleDateString("en-GB")}
-                      </TableCell>
-                      <TableCell align="center">{course.createBy}</TableCell>
-                      <TableCell align="center">
-                        <Button
-                          onClick={() => handleEditCourse(course)}
-                          sx={{ color: "blue" }}
-                        >
-                          <EditIcon sx={{ color: "blue" }} />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteCourse(course.id)}
-                          sx={{ color: "red" }}
-                        >
-                          <DeleteIcon sx={{ color: "red" }} />
-                        </Button>
-                        <Button
-                          onClick={() => handleViewChapters(course.id)}
-                          sx={{ color: "green" }}
-                        >
-                          Quản lý Chapters
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    <tr key={course.id}>
+                      <td className="col-id">{course.id}</td>
+                      <td className="col-title">{course.title}</td>
+                      <td className="col-desc">
+                        <div className="description-cell">
+                          {course.description}
+                        </div>
+                      </td>
+                      <td className="col-price">{course.coursePrice}đ</td>
+                      <td className="col-type">{course.courseType}</td>
+                      <td className="col-cover">
+                        <div className="image-cell">
+                          {course.cover && (
+                            <img
+                              src={`${BASE_API_URL}${course.cover}`}
+                              alt="Ảnh bìa"
+                              style={{ width: "180px", height: "100px" }}
+                              onClick={() =>
+                                handleImageClick(
+                                  `${BASE_API_URL}${course.cover}`
+                                )
+                              }
+                            />
+                          )}
+                        </div>
+                      </td>
+                      <td className="col-video">
+                        <div className="video-cell">
+                          {course.videoUrl ? (
+                            <Button
+                              onClick={() =>
+                                handleVideoPreview(course.videoUrl)
+                              }
+                            >
+                              Xem video
+                            </Button>
+                          ) : (
+                            <span>Chưa có video</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="col-actions">
+                        <div className="action-buttons">
+                          <Button onClick={() => handleEditCourse(course)}>
+                            <EditIcon sx={{ color: "blue" }} />
+                          </Button>
+                          <Button onClick={() => handleDeleteCourse(course.id)}>
+                            <DeleteIcon sx={{ color: "red" }} />
+                          </Button>
+                          <Button onClick={() => handleViewChapters(course.id)}>
+                            Chapters
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
 
-          <TablePagination
-            className="table-pagination"
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={courses.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={(event, newPage) => setPage(newPage)}
-            onRowsPerPageChange={(event) => {
-              setRowsPerPage(parseInt(event.target.value, 10));
-              setPage(0);
-            }}
-          />
+          <div className="pagination-container">
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={courses.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={(event, newPage) => setPage(newPage)}
+              onRowsPerPageChange={(event) => {
+                setRowsPerPage(parseInt(event.target.value, 10));
+                setPage(0);
+              }}
+            />
+          </div>
+          {/* modal view video  */}
+          <Modal
+            open={!!previewVideoUrl} // Modal mở khi URL tồn tại
+            onClose={() => setPreviewVideoUrl(null)}
+          >
+            <Box
+              sx={{
+                padding: 4,
+                maxWidth: 1500,
+                width: 1200,
+                height: 700,
+                margin: "auto",
+                bgcolor: "background.paper",
+                borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#e0e0e0", // màu nền tổng thể của khung ngoài video
+                marginTop: "2%",
+              }}
+            >
+              {previewVideoUrl ? (
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "#e0e0e0", // Màu xám cho phần ngoài khung video
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <video
+                    src={previewVideoUrl}
+                    controls
+                    preload="metadata"
+                    style={{
+                      width: "90%",
+                      height: "90%",
+
+                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
+                    }}
+                  />
+                </div>
+              ) : (
+                <p>Không thể tải video</p>
+              )}
+            </Box>
+          </Modal>
         </div>
       </AdminLayout>
       <ToastContainer />

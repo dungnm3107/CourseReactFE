@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Course from "../../components/slide/Course";
+import { AdvertBanner } from "../../components/slide/AdvertBanner";
 import CardList from "../../components/course/CardList";
 import CardListPro from "../../components/course/CardListPro";
 import CardListVideo from "../../components/course/CardListVideo";
@@ -56,15 +56,16 @@ export default function Home() {
 
   return (
     <MainLayout
-      avatar={avatar}
-      role={role}
       isBlurred={isBlurred}
       onOpenLoginModal={handleOpenLoginModal}
       onOpenSignUpModal={handleOpenSignUpModal}
     >
-      <Course />
-      <CardListPro />
-      <CardList />
+      <AdvertBanner />
+      <br></br>
+      <CardListPro/>
+      <br></br>
+      <CardList/>
+      <br></br>
       <CardListVideo />
       <LoginModal
         open={isLoginModalOpen}

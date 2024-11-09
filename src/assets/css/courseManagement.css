@@ -1,48 +1,38 @@
-.container-content {
-  width: 100%; /* Chiếm toàn bộ chiều rộng của trang */
-  text-align: center; /* Giữ căn giữa nội dung */
-  margin-top: 20px; /* Khoảng cách phía trên */
-  padding: 0 20px; /* Thêm padding nhỏ để tránh đụng rìa màn hình */
-  box-sizing: border-box; /* Đảm bảo padding không làm thay đổi kích thước phần tử */
-}
+
 
 h1 {
-  font-size: 34px; /* Giữ kích thước font */
+  font-size: 34px;
   font-weight: bold;
-  margin-bottom: 20px; /* Khoảng cách dưới heading */
+  margin-bottom: 20px;
 }
 
-.table-container {
-  width: 90%; /* Giữ bảng rộng 90% */
-  margin: 0 auto; /* Căn giữa bảng */
-  overflow-x: auto; /* Thêm cuộn ngang nếu bảng lớn hơn container */
-}
+
 
 .MuiTablePagination-root {
   display: flex;
-  justify-content: center; /* Căn giữa phần phân trang */
+  justify-content: center;
   align-items: center;
 }
 
 .MuiTablePagination-toolbar {
-  justify-content: center; /* Căn giữa pagination */
-  gap: 10px; /* Thêm khoảng cách giữa các phần tử pagination */
+  justify-content: center;
+  gap: 10px;
 }
 
 .MuiTable-root {
-  table-layout: fixed; /* Giữ bảng cố định kích thước */
+  table-layout: fixed;
   width: 100%;
-  margin-bottom: 20px; /* Khoảng cách dưới bảng */
-  min-width: 800px; /* Đặt chiều rộng tối thiểu cho bảng */
-  max-width: 2000px; /* Đặt chiều rộng tối đa cho bảng */
-  border-collapse: collapse; /* Gộp viền các ô bảng */
+  margin-bottom: 20px;
+  min-width: 800px;
+  max-width: 2000px;
+  border-collapse: collapse;
 }
 
 .MuiTableCell-root {
-  text-align: center; /* Căn giữa nội dung ô */
-  word-wrap: break-word; /* Ngắt dòng nếu nội dung quá dài */
-  padding: 10px; /* Khoảng cách bên trong ô */
-  border: 1px solid #ddd; /* Viền ô */
+  text-align: center;
+  word-wrap: break-word;
+  padding: 10px;
+  border: 1px solid #ddd;
 }
 
 .modal-box {
@@ -51,25 +41,173 @@ h1 {
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
+  max-height: 95vh;
+  overflow-y: auto;
 }
 
-.button-container {
+.course-button-container {
   display: flex;
-  justify-content: flex-end; /* Di chuyển nút sang rìa phải */
+  justify-content: flex-end;
   margin-top: 20px;
-  margin-right: 30px;
-  margin-bottom: 10px;;
+  margin-right: 37px;
+  margin-bottom: 20px;
 }
 
 button {
   padding: 10px 20px;
-  background-color: #007bff; /* Màu nền cho nút */
-  color: white; /* Màu chữ */
-  border: none; /* Loại bỏ viền */
-  border-radius: 5px; /* Bo tròn nút */
-  cursor: pointer; /* Thêm con trỏ chỉ tay khi hover */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
-  background-color: #0056b3; /* Đổi màu khi hover */
+  background-color: #0056b3;
+}
+
+.course-table-container {
+
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-right: 30px;
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border: 1px solid #ddd;
+ 
+}
+
+.course-table th {
+  background-color: #d7d5d5;
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 2px solid #ddd;
+  border-right: 1px solid #ddd; 
+  white-space: nowrap;
+  font-weight: bold; 
+  color: #333; 
+}
+.course-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd; 
+  vertical-align: middle; /* Thay đổi từ top sang middle để căn giữa theo chiều dọc */
+  text-align: center; 
+}
+
+/* Column widths */
+.col-id {
+  width: 5%;
+  min-width: 50px;
+}
+
+.col-title {
+  width: 15%;
+  min-width: 150px;
+}
+
+.col-desc {
+  width: 25%;
+  min-width: 200px;
+}
+
+.col-price {
+  width: 8%;
+  min-width: 80px;
+}
+
+.col-type {
+  width: 7%;
+  min-width: 70px;
+}
+
+
+
+.col-video {
+  width: 15%;
+  min-width: 150px;
+}
+
+.col-actions {
+  width: 10%;
+  min-width: 120px;
+}
+
+/* Cell styles */
+.course-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle; /* Căn giữa theo chiều dọc */
+}
+
+/* Description cell */
+.description-cell {
+  max-height: 100px;
+  overflow-y: auto;
+  line-height: 1.4;
+  padding-right: 10px;
+  text-align: left; /* Giữ căn trái cho phần mô tả */
+}
+
+/* Image cell */
+.image-cell {
+  width: 180px;
+  height: 100px;
+  overflow: hidden;
+}
+
+.image-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.image-cell img:hover {
+  transform: scale(1.1);
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Hover effect */
+.course-table tbody tr:hover {
+  background-color: #f8f8f8;
+}
+
+/* Scrollbar styles for description */
+.description-cell::-webkit-scrollbar {
+  width: 6px;
+}
+
+.description-cell::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.description-cell::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+  .course-table {
+      min-width: 1200px;
+  }
+  
+  .description-cell {
+      max-height: 80px;
+  }
 }

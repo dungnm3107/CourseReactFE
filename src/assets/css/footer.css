@@ -8,8 +8,45 @@ footer .list-unstyled li {
 
 .social-icons {
   z-index: 1002;
+  display: flex;
+  justify-content: flex-end;
 }
 
-footer {
-  overflow: hidden;
+footer .container {
+  display: flex;
+  justify-content: space-evenly;
+  /* margin-top:0px;
+  margin-left: 100px;  */
+}
+
+footer .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+footer h5 {
+  margin-bottom: 1.5rem;
+}
+
+footer .col-lg-4 {
+  flex: 1;
+  padding: 0 15px;
+  
+}
+
+footer .copyright-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  margin-left: 250px;
+}
+
+footer .social-icons a {
+  margin-left: 0.5rem;
+}
+.container p-4{
+  margin-left: 100px;
 }

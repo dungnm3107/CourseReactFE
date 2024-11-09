@@ -2,12 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Button,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TablePagination,
   Modal,
   Box,
@@ -216,67 +210,51 @@ const ChapterManagement: React.FC = () => {
   return (
     <AdminLayout avatar={avatar} role={role}>
       <div className="container-content">
-        <h1>Quản lý Chapter</h1>
-        <div className="button-container">
+        <h1>QUẢN LÝ CHƯƠNG</h1>
+        <div className="chapter-button-container">
           <Button variant="contained" color="primary" onClick={handleOpenModal}>
-            Thêm Chapter
+            Thêm mới chương
           </Button>
         </div>
-        <div className="table-container">
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">ID</TableCell>
-                  <TableCell align="center">Tiêu đề</TableCell>
-                  <TableCell align="center">Mô tả</TableCell>
-                  <TableCell align="center">Thứ tự</TableCell>
-                  <TableCell align="center">Số lượng bài học</TableCell>
-                  <TableCell align="center">Hành động</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {chapters.map((chapter) => (
-                  <TableRow key={chapter.id}>
-                    <TableCell align="center">{chapter.id}</TableCell>
-                    <TableCell align="center">{chapter.title}</TableCell>
-                    <TableCell align="center">{chapter.description}</TableCell>
-                    <TableCell align="center">
-                      {chapter.chapterSequence}
-                    </TableCell>
-                    <TableCell align="center">
-                      {chapter.lessons.length}
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        onClick={() => handleEdit(chapter)}
-                        sx={{ color: "blue" }}
-                      >
+        <div className="chapter-table-container">
+          <table className="chapter-table">
+            <thead>
+              <tr>
+                <th className="col-id">ID</th>
+                <th className="col-title">Tiêu đề</th>
+                <th className="col-desc">Mô tả</th>
+                <th className="col-sequence">Thứ tự</th>
+                <th className="col-lessons">Số lượng bài học</th>
+                <th className="col-actions">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chapters.map((chapter) => (
+                <tr key={chapter.id}>
+                  <td className="col-id">{chapter.id}</td>
+                  <td className="col-title">{chapter.title}</td>
+                  <td className="col-desc">{chapter.description}</td>
+                  <td className="col-sequence">{chapter.chapterSequence}</td>
+                  <td className="col-lessons">{chapter.lessons.length}</td>
+                  <td className="col-actions">
+                    <div className="action-buttons">
+                      <IconButton onClick={() => handleEdit(chapter)} sx={{ color: "blue" }}>
                         <Edit sx={{ color: "blue" }} />
                       </IconButton>
-                      <IconButton
-                        onClick={() => handleDeleteChapter(chapter.id)}
-                        sx={{ color: "red" }}
-                      >
+                      <IconButton onClick={() => handleDeleteChapter(chapter.id)} sx={{ color: "red" }}>
                         <Delete sx={{ color: "red" }} />
                       </IconButton>
-                      <Button
-                        onClick={() =>
-                          navigate(
-                            `/admin/courses/${courseId}/chapters/${chapter.id}/lessons`
-                          )
-                        }
-                        sx={{ color: "green" }}
-                      >
-                        Quản lý Lessons
+                      <Button onClick={() => navigate(`/admin/courses/${courseId}/chapters/${chapter.id}/lessons`)}>
+                        Lessons
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        <div className="pagination-container">
         <TablePagination
           component="div"
           count={chapters.length}
@@ -285,6 +263,7 @@ const ChapterManagement: React.FC = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+        </div>
 
         <Modal open={openModal} onClose={handleCloseModal}>
           <Box className="modal-box">

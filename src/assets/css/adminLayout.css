@@ -1,0 +1,33 @@
+.admin-layout-content-wrapper {
+    display: flex; /* Sử dụng flexbox để sắp xếp sidebar và nội dung chính */
+    height: 100vh; /* Đặt chiều cao cho wrapper */
+    transition: margin-left 0.3s;
+}
+
+.admin-layout-sidebar-container {
+    background-color: rgb(34, 38, 49); 
+    color: white; 
+    position: fixed; 
+    height: 100%; 
+    overflow-y: auto; 
+    top: 0; 
+    transition: transform 0.3s ease; 
+    width: 214px;
+}
+
+.admin-content {
+    flex: 1; 
+    transition: margin-left 0.3s; 
+}
+
+.admin-layout-sidebar-container.open + .admin-content {
+    margin-left: 250px; 
+}
+
+.admin-layout-sidebar-container.closed {
+    transform: translateX(-100%); 
+}
+
+.admin-layout-sidebar-container.open {
+    transform: translateX(0);
+}

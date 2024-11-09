@@ -1,0 +1,30 @@
+/* src/assets/css/favoritesPage.css */
+.favorites-page {
+  padding: 20px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 cột */
+  gap: 20px; /* Khoảng cách giữa các video */
+}
+
+.video-item {
+  cursor: pointer;
+  text-align: center;
+  position: relative; /* Để sử dụng cho khung video */
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: auto; /* Để tự động điều chỉnh chiều cao */
+  aspect-ratio: 16 / 9; /* Tỷ lệ 16:9 cho video */
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.video-title {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}

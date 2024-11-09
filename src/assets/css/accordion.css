@@ -37,3 +37,7 @@
   .text-right-col {
     margin-left: auto;
   }
+  .accordion-button.collapsed:hover {
+    color: white;
+  }
+  
