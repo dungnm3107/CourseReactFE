@@ -39,6 +39,7 @@ const Dashboard: React.FC = () => {
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [openVideoModal, setOpenVideoModal] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+  const [acccessUser, setAcccessUser] = useState<number[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -164,12 +165,29 @@ const Dashboard: React.FC = () => {
       }
     };
 
+    const fetchAcccessUser = async () => {
+      try {
+        const response = await axiosInstance.get(
+          "/api/v1/google-analytics/user-access",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setAcccessUser(response.data);
+      } catch (error) {
+        console.error("Error fetching total revenue:", error);
+      }
+    }
+
     fetchUserCount();
     fetchCourseStatistics();
     fetchRegistrationStatistics();
     fetchRevenueStatistics();
     fetchFavoriteLessons();
     fetchTotalRevenue();
+    fetchAcccessUser();
   }, [selectedYear]);
 
   const handleOpenModal = (videoUrl: string) => {
@@ -199,7 +217,7 @@ const Dashboard: React.FC = () => {
           <div className="dashboard-cards">
             <div className="admin-card" style={{ backgroundColor: "#4CAF50" }}>
               <h2>Số lượng truy cập</h2>
-              <p>100000 users</p>
+              <p>{acccessUser} lượt</p>
             </div>
             <div className="admin-card" style={{ backgroundColor: "#2196F3" }}>
               <h2>Số lượng người dùng</h2>
