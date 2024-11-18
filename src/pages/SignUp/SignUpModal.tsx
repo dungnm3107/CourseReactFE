@@ -32,6 +32,7 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
         boxShadow: 24,
         p: 4,
         overflow: "hidden",
+        borderRadius: '15px',
       }}>
         <IconButton
           aria-label="close"

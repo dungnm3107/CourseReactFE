@@ -15,6 +15,7 @@ import { useAuth } from "../../service/AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../assets/css/lessonManagement.css";
+import Hls from "hls.js";
 
 interface Lesson {
   idLesson: number;
@@ -46,7 +47,8 @@ const LessonManagement: React.FC = () => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
-  const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
+  const [originalVideo, setOriginalVideo] = useState<string | null>(null);
+  // const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     fetchLessons();
@@ -67,19 +69,25 @@ const LessonManagement: React.FC = () => {
           },
         }
       );
-       // Gọi API để lấy presignedUrl cho videoUrl
-    const lessonsWithPresignedUrls = await Promise.all(response.data.result.map(async (lesson: Lesson) => {
-      if (lesson.videoUrl) {
-        const presignedUrlResponse = await axiosInstance.get(`/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(lesson.videoUrl)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        return { ...lesson, videoUrl: presignedUrlResponse.data.url };
-      }
-      return lesson; 
-    }));
+      // Gọi API để lấy signedUrl cho videoUrl
+      const lessonsWithPresignedUrls = await Promise.all(
+        response.data.result.map(async (lesson: Lesson) => {
+          if (lesson.videoUrl) {
+            const presignedUrlResponse = await axiosInstance.get(
+              `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(
+                lesson.videoUrl
+              )}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            return { ...lesson, videoUrl: presignedUrlResponse.data };
+          }
+          return lesson;
+        })
+      );
 
       setLessons(lessonsWithPresignedUrls);
     } catch (error) {
@@ -87,6 +95,33 @@ const LessonManagement: React.FC = () => {
       console.error("Error fetching lessons:", error);
     }
   };
+  // useEffect(() => {
+  //   if (previewVideoUrl && videoRef.current) {
+  //     // Initialize Hls.js if supported
+  //     const hls = new Hls();
+  //     if (Hls.isSupported()) {
+  //       hls.loadSource(previewVideoUrl);
+
+  //       hls.attachMedia(videoRef.current);
+  //       hls.on(Hls.Events.MANIFEST_PARSED, () => {
+  //         console.log("Manifest loaded");
+  //       });
+  //       hls.on(Hls.Events.ERROR, (event, data) => {
+  //         console.error("HLS.js error:", data);
+  //       });
+
+  //       // Cleanup on component unmount
+  //       return () => {
+  //         hls.destroy();
+  //       };
+  //     } else if (
+  //       videoRef.current.canPlayType("application/vnd.apple.mpegurl")
+  //     ) {
+  //       // If HLS is supported natively (e.g., Safari)
+  //       videoRef.current.src = previewVideoUrl;
+  //     }
+  //   }
+  // }, [previewVideoUrl]);
 
   // Kiểm tra trạng thái và video trước khi lưu
   const handleSave = async () => {
@@ -97,11 +132,10 @@ const LessonManagement: React.FC = () => {
     }
 
     try {
-    
       const updatedFormData = {
         ...formData,
         idChapter: parseInt(chapterId ? chapterId : "0"),
-        videoUrl: originalVideoUrl
+        videoUrl: originalVideo,
       };
 
       if (formData.idLesson) {
@@ -159,10 +193,12 @@ const LessonManagement: React.FC = () => {
     setOpenModal(true);
   };
 
-  const handleChangePage = (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+  const handleChangePage = (
+    _: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
     setPage(newPage);
   };
-  
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -207,7 +243,7 @@ const LessonManagement: React.FC = () => {
         uploadFormData.append("file", file);
 
         const response = await axiosInstance.post(
-          "/api/v1/video/upload",
+          "/api/v1/video/gcs/upload",
           uploadFormData,
           {
             headers: {
@@ -217,12 +253,12 @@ const LessonManagement: React.FC = () => {
           }
         );
 
-        const videoUrl = response.data.url;
-        console.log("Uploaded video URL: ", videoUrl);
+        const videoName = response.data;
+        console.log("Uploaded video name: ", videoName);
 
         // Gọi API để lấy presigned URL
-        const presignedUrlResponse = await axiosInstance.get(
-          `/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(videoUrl)}`,
+        const signedUrlResponse = await axiosInstance.get(
+          `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(videoName)}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -230,12 +266,12 @@ const LessonManagement: React.FC = () => {
           }
         );
 
-        const presignedUrl = presignedUrlResponse.data.url; // URL ký kết
+        const signedUrl = signedUrlResponse.data; // URL ký kết
 
-        setOriginalVideoUrl(videoUrl);
+        setOriginalVideo(videoName);
         setFormData((prevFormData) => ({
           ...prevFormData,
-          videoUrl: presignedUrl,
+          videoUrl: signedUrl,
         }));
 
         toast.success("Tải video thành công!"); // Thông báo khi video tải lên thành công
@@ -246,19 +282,18 @@ const LessonManagement: React.FC = () => {
           // Kiểm tra lỗi từ backend (417 Expectation Failed)
           toast.error(error.response.data); // Hiển thị thông báo lỗi từ backend
         } else {
-          toast.error("Lỗi khi tải video lên S3!");
+          toast.error("Lỗi khi tải video lên Google Cloud Storage!");
         }
       } finally {
-        setIsUploading(false); // Kết thúc quá trình upload
+        setIsUploading(false);
       }
     }
   };
 
   //xem video
   const handleVideoPreview = (videoUrl: string) => {
-    console.log("Video URL in preview:", videoUrl); // Kiểm tra giá trị videoUrl
     setPreviewVideoUrl(videoUrl);
-};
+  };
 
   return (
     <AdminLayout avatar={avatar} role={role}>
@@ -325,14 +360,14 @@ const LessonManagement: React.FC = () => {
           </table>
         </div>
         <div className="pagination-container">
-        <TablePagination
-          component="div"
-          count={lessons.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+          <TablePagination
+            component="div"
+            count={lessons.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </div>
         {/* modal them moi hoac chinh sua bai hoc */}
         <Modal open={openModal} onClose={handleCloseModal}>
@@ -391,12 +426,18 @@ const LessonManagement: React.FC = () => {
                   }}
                 >
                   <video
-                    src={formData.videoUrl}
+                    ref={(videoRef) => {
+                      if (videoRef) {
+                        const hls = new Hls();
+                        hls.loadSource(formData.videoUrl || "");
+                        hls.attachMedia(videoRef);
+                      }
+                    }}
                     controls
-                    preload="metadata" // tải dữ liệu trước để view cho tối ưu, thay vì tải toàn bộ
+                    preload="metadata"
                     style={{
                       maxWidth: "100%",
-                      height: "auto", // Tự động điều chỉnh chiều cao để giữ tỷ lệ
+                      height: "auto",
                     }}
                   />
                 </Box>
@@ -477,7 +518,7 @@ const LessonManagement: React.FC = () => {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "#e0e0e0", 
+              backgroundColor: "#e0e0e0",
               marginTop: "2%",
             }}
           >
@@ -487,18 +528,24 @@ const LessonManagement: React.FC = () => {
                   position: "relative",
                   width: "100%",
                   height: "100%",
-                  backgroundColor: "#e0e0e0", 
+                  backgroundColor: "#e0e0e0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
                 <video
-                  src={previewVideoUrl}
+                  ref={(videoRef) => {
+                    if (videoRef) {
+                      const hls = new Hls();
+                      hls.loadSource(previewVideoUrl);
+                      hls.attachMedia(videoRef);
+                    }
+                  }}
                   controls
                   preload="metadata"
                   style={{
-                    width: "90%", 
+                    width: "90%",
                     height: "90%",
                     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)", // Bóng đổ cho video để làm nổi bật
                   }}

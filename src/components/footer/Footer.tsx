@@ -9,8 +9,8 @@ export default function Footer() {
       style={{ backgroundColor: "#111111", width: "100%" }}
       className="text-white mt-3 position-relative"
     >
-      <div className="container p-4">
-        <div className="row justify-content-center">
+      <div className="container p-4 container-footer">
+        <div className="row justify-content-center footer-content">
           {/* New contact information column */}
           <div className="col-lg-4 col-md-6 mb-4">
             <div className="d-flex align-items-center mb-2">
@@ -34,8 +34,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          <div className="col-lg-4 col-md-6 mb-4">
+          <div className="col-lg-4 col-md-6 mb-4 ">
             <h5 className="text-uppercase">VỀ IT COURSE</h5>
             <ul className="list-unstyled">
               {[
@@ -75,7 +74,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="container copyright-section">
-        <div>
+        <div className="text-copyright">
           © 2024 Copyright <span className="fw-bold"> Nguyễn Mạnh Dũng</span>
         </div>
         <div className="social-icons">

@@ -27,9 +27,11 @@ const defaultTheme = createTheme();
 export default function SignIn({
   onSwitchToSignUp,
   onSuccessfulLogin,
+  onSwitchToForgotPassword,
 }: {
   onSwitchToSignUp: () => void;
   onSuccessfulLogin: () => void;
+  onSwitchToForgotPassword: () => void;
 }) {
   const navigate = useNavigate();
   const {checkLoginStatus} = useAuth();
@@ -214,16 +216,24 @@ export default function SignIn({
                 ),
               }}
             />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="remember"
-                  color="primary"
-                  defaultChecked={true}
-                />
-              }
-              label="Ghi nhớ đăng nhập"
-            />
+           <Grid container justifyContent="flex-start">
+              <Grid item>
+                <button
+                  onClick={onSwitchToForgotPassword}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: "10px 10px",
+                    font: "inherit",
+                    color: "blue",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                  }}
+                >
+                  Quên mật khẩu?
+                </button>
+              </Grid>
+            </Grid>
             <Button
               style={{ backgroundColor: "#3333CC", color: "white" }}
               type="submit"

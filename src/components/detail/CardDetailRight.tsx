@@ -1,47 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CardMedia from "@mui/material/CardMedia";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBatteryFull,
-  faFilm,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBatteryFull, faFilm } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { Modal, Box } from "@mui/material";
+import Hls from "hls.js";
+import useGetSignedUrl from "../../hooks/useGetSignedUrl";
 
 interface CardDetailRightProps {
   totalLessons: number;
-  courseId: number; 
-  avatar: string; 
+  courseId: number;
+  avatar: string;
   role: string;
-  videoUrl: string; 
+  videoUrl: string;
   coursePrice: number;
 }
 
 export default function CardDetailRight({
   totalLessons,
   courseId,
-  videoUrl, 
+  videoUrl,
   coursePrice,
 }: CardDetailRightProps) {
   const navigate = useNavigate();
-  const [openVideoModal, setOpenVideoModal] = useState(false); // Trạng thái modal video
-  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null); // URL video để xem trước
+  const [openVideoModal, setOpenVideoModal] = useState(false); 
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null); 
+  const signedUrl = useGetSignedUrl(videoUrl);
 
   const handleVideoClick = () => {
-    setPreviewVideoUrl(videoUrl);
-    setOpenVideoModal(true); 
+   setPreviewVideoUrl(signedUrl);
+      setOpenVideoModal(true);
+   
   };
+  
 
   const handleCloseModal = () => {
-    setOpenVideoModal(false); 
-    setPreviewVideoUrl(null); 
+    setOpenVideoModal(false);
   };
 
   const handleLearnNowClick = () => {
     if (coursePrice === 0) {
-      navigate(`/course-detail-view/${courseId}`); 
+      navigate(`/course-detail-view/${courseId}`);
     } else {
-      navigate(`/course-detail-view-pro/${courseId}`); 
+      navigate(`/course-detail-view-pro/${courseId}`);
     }
   };
 
@@ -49,20 +50,26 @@ export default function CardDetailRight({
     <div className="row">
       <div className="col-12 d-flex justify-content-center mt-4">
         <div
-          onClick={handleVideoClick} 
+          onClick={handleVideoClick}
           style={{
-            cursor: "pointer", 
+            cursor: "pointer",
             width: "100%",
-            maxHeight: "300px", 
+            height: "320px",
             overflow: "hidden", // Ẩn phần video vượt quá khung
-            borderRadius: "15px", 
-            position: "relative", 
+            borderRadius: "15px",
+            position: "relative",
           }}
         >
           <CardMedia
             component="video"
             controls
-            src={videoUrl}
+            ref={(videoRef) => {
+              if (videoRef) {
+                const hls = new Hls();
+                hls.loadSource(signedUrl || "");
+                hls.attachMedia(videoRef);
+              }
+            }}
             style={{
               width: "100%",
               height: "100%", // Đặt chiều cao 100% để video chiếm toàn bộ khung
@@ -72,7 +79,9 @@ export default function CardDetailRight({
         </div>
       </div>
       <div className="col-12 d-flex justify-content-center mt-2">
-        <p style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold" }}>
+        <p
+          style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold" }}
+        >
           Xem giới thiệu khóa học
         </p>
       </div>
@@ -92,7 +101,7 @@ export default function CardDetailRight({
       </div>
       <div className="col-12 d-flex justify-content-center mx-3 mt-2">
         <button
-          onClick={handleLearnNowClick} 
+          onClick={handleLearnNowClick}
           style={{
             color: "white",
             backgroundColor: "#3366cc",
@@ -139,7 +148,13 @@ export default function CardDetailRight({
               }}
             >
               <video
-                src={previewVideoUrl}
+                ref={(videoRef) => {
+                  if (videoRef) {
+                    const hls = new Hls();
+                    hls.loadSource(previewVideoUrl);
+                    hls.attachMedia(videoRef);
+                  }
+                }}
                 controls
                 preload="metadata"
                 style={{

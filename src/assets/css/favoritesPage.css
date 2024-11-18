@@ -28,3 +28,26 @@
   font-size: 16px;
   font-weight: bold;
 }
+.video-lessons-favarite{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 40px;
+}
+.video-lesson-card-favorite{
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.video-lesson-card-favorite:hover {
+  transform: translateY(-5px);
+}
+.video-lesson-card-favorite-wrapper {
+  padding: 20px; /* Khoảng cách bao quanh */
+  background-color: #b6e2db; /* Màu nền nhạt cho khối bọc */
+  border-radius: 12px; /* Bo góc */
+  transition: box-shadow 0.2s ease-in-out;
+  /* border: 2px solid #e0dede; */
+}

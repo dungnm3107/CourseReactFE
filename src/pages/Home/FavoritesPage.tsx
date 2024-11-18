@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../service/AuthContext";
 import axiosInstance from "../../config/axios";
-import { Modal, Box } from "@mui/material"; // Import Modal và Box từ MUI
-import '../../assets/css/favoritesPage.css'; // Import file CSS
+import '../../assets/css/favoritesPage.css'; 
+import Hls from "hls.js"; 
 
+  
 interface Lesson {
   id: number;
   idChapter: number;
@@ -21,9 +22,8 @@ interface FavoriteLessonResponse {
 const FavoritesPage: React.FC = () => {
   const { userId } = useAuth();
   const [favoriteLessons, setFavoriteLessons] = useState<FavoriteLessonResponse[]>([]);
-  const [openVideoModal, setOpenVideoModal] = useState(false);
-  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null); 
+  const [hlsInstances, setHlsInstances] = useState<Map<number, Hls>>(new Map());
+  const videoRefs = useRef<Map<number, HTMLVideoElement | null>>(new Map());
 
   useEffect(() => {
     const fetchFavoriteLessons = async () => {
@@ -42,19 +42,36 @@ const FavoritesPage: React.FC = () => {
     fetchFavoriteLessons();
   }, [userId]);
 
-  const handleOpenModal = (videoUrl: string) => {
-    // Pause the currently playing video if it exists
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-    setPreviewVideoUrl(videoUrl);
-    setOpenVideoModal(true);
-  };
+   // Sử dụng HLS để phát video từ URL có chữ ký
+   useEffect(() => {
+    favoriteLessons.forEach((favoriteLesson) => {
+      const videoRef = videoRefs.current.get(favoriteLesson.id);
+      if (videoRef && Hls.isSupported()) {
+        const hls = new Hls();
+        const fetchSignedUrl = async () => {
+          try {
+            const signedUrlResponse = await axiosInstance.get(
+              `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(
+                favoriteLesson.lesson.videoUrl
+              )}`
+            );
+            const signedUrl = signedUrlResponse.data;
+            hls.loadSource(signedUrl);
+            hls.attachMedia(videoRef);
+          } catch (error) {
+            console.error("Error fetching signed video URL:", error);
+          }
+        };
+        fetchSignedUrl();
+        setHlsInstances((prev) => new Map(prev.set(favoriteLesson.id, hls)));
+      }
+    });
 
-  const handleCloseModal = () => {
-    setOpenVideoModal(false);
-    setPreviewVideoUrl(null);
-  };
+    // Cleanup HLS instances
+    return () => {
+      hlsInstances.forEach((hls) => hls.destroy());
+    };
+  }, [favoriteLessons]);
 
   return (
     <div className="favorites-page">
@@ -62,70 +79,31 @@ const FavoritesPage: React.FC = () => {
       {favoriteLessons.length === 0 ? (
         <p>Chưa có bài học nào trong danh sách yêu thích.</p>
       ) : (
-        <div className="video-grid">
-          {favoriteLessons.map((favoriteLesson) => (
-            <div key={favoriteLesson.id} className="video-item" onClick={() => handleOpenModal(favoriteLesson.lesson.videoUrl)}>
+        
+        <div className="video-lessons-favarite">
+        {favoriteLessons.map((favoriteLesson) => (
+          <div key={favoriteLesson.id} className="video-lesson-card-favorite-wrapper">
+            <div
+              className="video-lesson-card-favorite"
+            >
               <video
-                src={favoriteLesson.lesson.videoUrl}
                 controls
-                preload="none"
+                preload="metadata"
                 className="video-thumbnail"
-                ref={videoRef} 
+                ref={(el) => {
+                  videoRefs.current.set(favoriteLesson.id, el);
+                }}
                 muted
               />
               <h2 className="video-title">{favoriteLesson.lesson.title}</h2>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
+      
+      
       )}
 
-      {/* Modal xem video */}
-      <Modal open={openVideoModal} onClose={handleCloseModal}>
-        <Box
-          sx={{
-            padding: 4,
-            maxWidth: 1500,
-            width: 1200,
-            height: 700,
-            margin: "auto",
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#e0e0e0",
-            marginTop: "2%",
-          }}
-        >
-          {previewVideoUrl ? (
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                backgroundColor: "#e0e0e0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <video
-                src={previewVideoUrl}
-                controls
-                preload="metadata"
-                style={{
-                  width: "90%",
-                  height: "90%",
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-                }}
-              />
-            </div>
-          ) : (
-            <p>Không thể tải video</p>
-          )}
-        </Box>
-      </Modal>
     </div>
   );
 };

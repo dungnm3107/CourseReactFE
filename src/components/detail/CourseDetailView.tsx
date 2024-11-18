@@ -13,6 +13,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "../../assets/css/courseDetailView.css";
 import { useAuth } from "../../service/AuthContext";
+import useGetSignedUrl from "../../hooks/useGetSignedUrl";
+import useHlsPlayer from "../../hooks/useHlsPlayer";
 
 interface Chapter {
   id: number;
@@ -52,6 +54,10 @@ const CourseDetailView: React.FC = () => {
     FavoriteLessonResponse[]
   >([]);
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const videoRef = React.createRef<HTMLVideoElement>();
+  const signedUrl = useGetSignedUrl(selectedLesson?.videoUrl || "");
+
+  useHlsPlayer(signedUrl, videoRef);
 
   useEffect(() => {
     const fetchCompletedLessons = async () => {
@@ -392,16 +398,14 @@ const CourseDetailView: React.FC = () => {
             <video
               id="video-player"
               key={selectedLesson.id}
+              ref={videoRef}
               controls
               preload="metadata"
               className="video-player"
               style={{
                 boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.3)",
               }}
-            >
-              <source src={selectedLesson.videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            />
           ) : (
             <div className="empty-video">
               <img

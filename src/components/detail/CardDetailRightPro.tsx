@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { useAuth } from "../../service/AuthContext"; // Use hook to get user info
@@ -6,7 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBatteryFull, faFilm } from "@fortawesome/free-solid-svg-icons";
 import CardMedia from "@mui/material/CardMedia";
 import { Modal, Box } from "@mui/material";
-
+import Hls from "hls.js";
+import useGetSignedUrl from "../../hooks/useGetSignedUrl";
 interface CardDetailRightProps {
   totalLessons: number;
   courseId: number;
@@ -21,17 +22,18 @@ export default function CardDetailRightPro({
   coursePrice,
   videoUrl,
   onOpenLoginModal,
-}: CardDetailRightProps ) {
+}: CardDetailRightProps) {
   console.log("Course Price in CardDetailRightPro:", coursePrice); // Kiểm tra giá trị coursePrice
 
   const navigate = useNavigate();
   const { userId, isLoggedIn } = useAuth();
   const [openVideoModal, setOpenVideoModal] = useState(false); // Trạng thái modal video
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null); // URL video để xem trước
+  const signedUrl = useGetSignedUrl(videoUrl);
 
   const handleVideoClick = () => {
-    setPreviewVideoUrl(videoUrl); // Cập nhật URL video
-    setOpenVideoModal(true); // Mở modal
+    setPreviewVideoUrl(signedUrl);
+    setOpenVideoModal(true);
   };
 
   const handleCloseModal = () => {
@@ -77,7 +79,7 @@ export default function CardDetailRightPro({
           style={{
             cursor: "pointer",
             width: "100%",
-            maxHeight: "300px",
+            height: "320px",
             overflow: "hidden", // Ẩn phần video vượt quá khung
             borderRadius: "15px",
             position: "relative",
@@ -86,17 +88,25 @@ export default function CardDetailRightPro({
           <CardMedia
             component="video"
             controls
-            src={videoUrl}
+            ref={(videoRef) => {
+              if (videoRef) {
+                const hls = new Hls();
+                hls.loadSource(signedUrl || "");
+                hls.attachMedia(videoRef);
+              }
+            }}
             style={{
               width: "100%",
-              height: "100%", // Đặt chiều cao 100% để video chiếm toàn bộ khung
-              objectFit: "cover", // Đảm bảo video không bị biến dạng
+              height: "100%",
+              objectFit: "cover",
             }}
           />
         </div>
       </div>
       <div className="col-12 d-flex justify-content-center mt-2">
-        <p style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold" }}>
+        <p
+          style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold" }}
+        >
           Xem giới thiệu khóa học
         </p>
       </div>
@@ -133,8 +143,8 @@ export default function CardDetailRightPro({
           MUA NGAY
         </button>
       </div>
-       {/* Modal xem video */}
-       <Modal open={openVideoModal} onClose={handleCloseModal}>
+      {/* Modal xem video */}
+      <Modal open={openVideoModal} onClose={handleCloseModal}>
         <Box
           sx={{
             padding: 4,
@@ -165,7 +175,13 @@ export default function CardDetailRightPro({
               }}
             >
               <video
-                src={previewVideoUrl}
+                ref={(videoRef) => {
+                  if (videoRef) {
+                    const hls = new Hls();
+                    hls.loadSource(previewVideoUrl);
+                    hls.attachMedia(videoRef);
+                  }
+                }}
                 controls
                 preload="metadata"
                 style={{

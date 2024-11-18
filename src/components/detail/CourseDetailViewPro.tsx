@@ -14,7 +14,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "../../assets/css/courseDetailView.css";
 import { useAuth } from "../../service/AuthContext";
-
+import useGetSignedUrl from "../../hooks/useGetSignedUrl";
+import useHlsPlayer from "../../hooks/useHlsPlayer";
 interface Chapter {
   id: number;
   title: string;
@@ -53,6 +54,10 @@ const CourseDetailViewPro: React.FC = () => {
     FavoriteLessonResponse[]
   >([]);
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const videoRef = React.createRef<HTMLVideoElement>();
+  const signedUrl = useGetSignedUrl(selectedLesson?.videoUrl || "");
+
+  useHlsPlayer(signedUrl, videoRef);
 
   useEffect(() => {
     const fetchCompletedLessons = async () => {
@@ -381,8 +386,15 @@ const CourseDetailViewPro: React.FC = () => {
   };
 
   const isLessonLocked = (lesson: Lesson) => {
-    const lessonIndex = chapters.flatMap(chapter => chapter.lessons).indexOf(lesson);
-    return lessonIndex > 0 && !completedLessons.includes(chapters.flatMap(chapter => chapter.lessons)[lessonIndex - 1].id);
+    const lessonIndex = chapters
+      .flatMap((chapter) => chapter.lessons)
+      .indexOf(lesson);
+    return (
+      lessonIndex > 0 &&
+      !completedLessons.includes(
+        chapters.flatMap((chapter) => chapter.lessons)[lessonIndex - 1].id
+      )
+    );
   };
   return (
     <div className="course-detail-view">
@@ -398,15 +410,13 @@ const CourseDetailViewPro: React.FC = () => {
               id="video-player"
               key={selectedLesson.id}
               controls
+              ref={videoRef}
               preload="metadata"
               className="video-player"
               style={{
                 boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.3)",
               }}
-            >
-              <source src={selectedLesson.videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            />
           ) : (
             <div className="empty-video">
               <img
@@ -436,7 +446,12 @@ const CourseDetailViewPro: React.FC = () => {
             <button
               className="nav-button"
               onClick={handleNextLesson}
-              disabled={watchedTime > 60 || (selectedLesson && completedLessons.includes(selectedLesson.id)) ? false : !findNextLesson()}
+              disabled={
+                watchedTime > 60 ||
+                (selectedLesson && completedLessons.includes(selectedLesson.id))
+                  ? false
+                  : !findNextLesson()
+              }
             >
               Sau <FontAwesomeIcon icon={faChevronRight} />
             </button>
@@ -464,7 +479,6 @@ const CourseDetailViewPro: React.FC = () => {
         </div>
 
         {/* Chapters Section */}
-        {/* Chapters Section */}
         <div className="chapters-container">
           {chapters.map((chapter) => (
             <div key={chapter.id} className="chapter">
@@ -489,25 +503,34 @@ const CourseDetailViewPro: React.FC = () => {
                   {chapter.lessons.map((lesson) => (
                     <li
                       key={lesson.id}
-                        onClick={() => !isLessonLocked(lesson) && handleLessonClick(lesson)}
+                      onClick={() =>
+                        !isLessonLocked(lesson) && handleLessonClick(lesson)
+                      }
                       className={`lesson-item ${
                         selectedLesson?.id === lesson.id ? "active" : ""
                       } ${isLessonLocked(lesson) ? "locked" : ""}`}
                     >
-                     Bài {lesson.lessonSequence}. {lesson.title}
-                    {isLessonLocked(lesson) && (
-                      <FontAwesomeIcon icon={faLock} style={{ marginLeft: '8px', color: 'gray', fontSize: '13px' }} />
-                    )}
-                    {completedLessons.includes(lesson.id) && (
-                      <span
-                        style={{
-                          color: "green",
-                          marginLeft: "8px",
-                          fontSize: "20px",
-                        }}
-                      >
-                        ✔
-                      </span>
+                      Bài {lesson.lessonSequence}. {lesson.title}
+                      {isLessonLocked(lesson) && (
+                        <FontAwesomeIcon
+                          icon={faLock}
+                          style={{
+                            marginLeft: "8px",
+                            color: "gray",
+                            fontSize: "13px",
+                          }}
+                        />
+                      )}
+                      {completedLessons.includes(lesson.id) && (
+                        <span
+                          style={{
+                            color: "green",
+                            marginLeft: "8px",
+                            fontSize: "20px",
+                          }}
+                        >
+                          ✔
+                        </span>
                       )}
                     </li>
                   ))}

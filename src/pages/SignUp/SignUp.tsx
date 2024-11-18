@@ -230,14 +230,6 @@ export default function SignUp({
                   }}
                 />
               </Grid>
-              {/* <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox value="allowExtraEmails" color="primary" />
-                  }
-                  label="Tôi muốn nhận thông tin đăng kí qua email"
-                />
-              </Grid> */}
             </Grid>
             <Button
               style={{ backgroundColor: "#3333CC", color: "white" }}

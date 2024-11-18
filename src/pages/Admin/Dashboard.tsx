@@ -16,7 +16,16 @@ import {
 } from "recharts";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Modal, Box } from "@mui/material";
+import Hls from "hls.js";
+interface Lesson {
+  id: number;
+  idChapter: number;
+  title: string;
+  lessonSequence: number;
+  content: string;
+  videoUrl: string;
+}
+
 
 const Dashboard: React.FC = () => {
   const { avatar, role } = useAuth();
@@ -31,16 +40,48 @@ const Dashboard: React.FC = () => {
     totalChapters: 0,
     totalLessons: 0,
   });
-  const [favoriteLessons, setFavoriteLessons] = useState<any[]>([]);
+  const [favoriteLessons, setFavoriteLessons] = useState<Lesson[]>([]);
   const [registrationData, setRegistrationData] = useState<any[]>([]);
   const [selectedYear, setSelectedYear] = useState<Date | null>(
     new Date(2024, 0, 1)
   );
   const [revenueData, setRevenueData] = useState<any[]>([]);
-  const [openVideoModal, setOpenVideoModal] = useState(false);
-  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
-  const [acccessUser, setAcccessUser] = useState<number[]>([]);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [accessUser, setAccessUser] = useState<number[]>([]);
+
+  const [hlsInstances, setHlsInstances] = useState<Map<number, Hls>>(new Map());
+  const videoRefs = useRef<Map<number, HTMLVideoElement | null>>(new Map());
+
+   // Sử dụng HLS để phát video từ URL có chữ ký
+   useEffect(() => {
+    favoriteLessons.forEach((favoriteLesson) => {
+      const videoRef = videoRefs.current.get(favoriteLesson.id);
+      if (videoRef && Hls.isSupported()) {
+        const hls = new Hls();
+        const fetchSignedUrl = async () => {
+          try {
+            const signedUrlResponse = await axiosInstance.get(
+              `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(
+                favoriteLesson.videoUrl
+              )}`
+            );
+            const signedUrl = signedUrlResponse.data;
+            hls.loadSource(signedUrl);
+            hls.attachMedia(videoRef);
+          } catch (error) {
+            console.error("Error fetching signed video URL:", error);
+          }
+        };
+        fetchSignedUrl();
+        setHlsInstances((prev) => new Map(prev.set(favoriteLesson.id, hls)));
+      }
+    });
+
+    // Cleanup HLS instances
+    return () => {
+      hlsInstances.forEach((hls) => hls.destroy());
+    };
+  }, [favoriteLessons]);
+  
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -134,7 +175,6 @@ const Dashboard: React.FC = () => {
     };
 
     const fetchFavoriteLessons = async () => {
-      // {{ edit_2 }}
       try {
         const response = await axiosInstance.get(
           "/api/v1/favorite-lessons/top4",
@@ -165,7 +205,7 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    const fetchAcccessUser = async () => {
+    const fetchAccessUser = async () => {
       try {
         const response = await axiosInstance.get(
           "/api/v1/google-analytics/user-access",
@@ -175,11 +215,11 @@ const Dashboard: React.FC = () => {
             },
           }
         );
-        setAcccessUser(response.data);
+        setAccessUser(response.data);
       } catch (error) {
         console.error("Error fetching total revenue:", error);
       }
-    }
+    };
 
     fetchUserCount();
     fetchCourseStatistics();
@@ -187,21 +227,8 @@ const Dashboard: React.FC = () => {
     fetchRevenueStatistics();
     fetchFavoriteLessons();
     fetchTotalRevenue();
-    fetchAcccessUser();
+    fetchAccessUser();
   }, [selectedYear]);
-
-  const handleOpenModal = (videoUrl: string) => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-    setPreviewVideoUrl(videoUrl);
-    setOpenVideoModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenVideoModal(false);
-    setPreviewVideoUrl(null);
-  };
 
   const formatCurrency = (amount: number): string => {
     return amount.toLocaleString("vi-VN");
@@ -217,7 +244,7 @@ const Dashboard: React.FC = () => {
           <div className="dashboard-cards">
             <div className="admin-card" style={{ backgroundColor: "#4CAF50" }}>
               <h2>Số lượng truy cập</h2>
-              <p>{acccessUser} lượt</p>
+              <p>{accessUser} lượt</p>
             </div>
             <div className="admin-card" style={{ backgroundColor: "#2196F3" }}>
               <h2>Số lượng người dùng</h2>
@@ -299,21 +326,18 @@ const Dashboard: React.FC = () => {
           <div className="chart-container">
             <h2>Top 4 bài học yêu thích nhiều nhất</h2>
             <div className="favorite-lessons-grid">
-              {favoriteLessons.map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="favorite-lesson-card"
-                  onClick={() => handleOpenModal(lesson.videoUrl)}
-                >
+              {favoriteLessons.map((favoriteLesson) => (
+                <div key={favoriteLesson.id} className="favorite-lesson-card">
                   <video
-                    src={lesson.videoUrl}
                     controls
-                    preload="none"
+                    preload="metadata"
                     className="video-thumbnail"
-                    ref={videoRef}
+                    ref={(el) => {
+                      videoRefs.current.set(favoriteLesson.id, el);
+                    }}
                     muted
                   />
-                  <h3 className="video-title">{lesson.title}</h3>
+                  <h3 className="video-title">{favoriteLesson.title}</h3>
                 </div>
               ))}
             </div>
@@ -322,57 +346,6 @@ const Dashboard: React.FC = () => {
           <br />
           <br />
           <br />
-          <br />
-          <br />
-          <br />
-
-          {/* Modal for video playback */}
-          <Modal open={openVideoModal} onClose={handleCloseModal}>
-            <Box
-              sx={{
-                padding: 4,
-                maxWidth: 1500,
-                width: 1200,
-                height: 700,
-                margin: "auto",
-                bgcolor: "background.paper",
-                borderRadius: 2,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#e0e0e0",
-                marginTop: "2%",
-              }}
-            >
-              {previewVideoUrl ? (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: "#e0e0e0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <video
-                    src={previewVideoUrl}
-                    controls
-                    preload="metadata"
-                    style={{
-                      width: "90%",
-                      height: "90%",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-                    }}
-                  />
-                </div>
-              ) : (
-                <p>Không thể tải video</p>
-              )}
-            </Box>
-          </Modal>
         </div>
       </div>
     </AdminLayout>

@@ -24,9 +24,12 @@ import LoginModal from "../../src/pages/SignIn/LoginModal"
 import SignUpModal from "../../src/pages/SignUp/SignUpModal"
 import CourseDetailViewPro from '../components/detail/CourseDetailViewPro';
 
+
 function AppRouter() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleOpenLoginModal = () => {
     setIsSignUpModalOpen(false);
@@ -40,13 +43,14 @@ function AppRouter() {
     setIsLoginModalOpen(false);
     setIsSignUpModalOpen(true);
   };
+
   const handleCloseSignUpModal = () => setIsSignUpModalOpen(false);
   // const { avatar, role } = useAuth();
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<SignIn onSwitchToSignUp={() => {}} onSuccessfulLogin={() => {}} />} />
+        <Route path="/login" element={<SignIn onSwitchToSignUp={() => {}} onSuccessfulLogin={() => {} } onSwitchToForgotPassword ={() => {}}/>} />
         <Route path="/register" element={<SignUp onSwitchToLogin={() => {}} onSuccessfulSignUp={() => {}} />} />
         <Route path="/course-detail/:id" element={<MainLayout onOpenLoginModal={() => {}} onOpenSignUpModal={() => {}} ><CardDetail /></MainLayout>} /> 
         <Route path="/course-detail-pro/:id" element={<MainLayout onOpenLoginModal={handleOpenLoginModal} onOpenSignUpModal={handleOpenSignUpModal} ><CardDetailPro /></MainLayout>} />  
@@ -64,14 +68,13 @@ function AppRouter() {
         <Route path="/payment-failed" element={<PaymentFailed/>} />
         <Route path="/api/v1/payment/vn-pay-callback" element={<PaymentSuccess />} />
         <Route path="/about-page" element={<AboutPage /> }/> 
-        <Route path="/favorites" element={<MainLayout onOpenLoginModal={() => {}} onOpenSignUpModal={() => {}} ><FavoritesPage /></MainLayout>} /> 
+        <Route path="/favorites" element={<MainLayout onOpenLoginModal={() => {}} onOpenSignUpModal={() => {}} ><FavoritesPage /></MainLayout>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <LoginModal
         open={isLoginModalOpen}
         onClose={handleCloseLoginModal}
         onSwitchToSignUp={handleOpenSignUpModal}
-        onSuccessfulLogin={handleCloseLoginModal}
       />
       <SignUpModal
         open={isSignUpModalOpen}

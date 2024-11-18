@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../../config/axios";
 import AdminLayout from "../../components/layout/AdminLayout";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,6 +9,8 @@ import "../../assets/css/courseManagement.css";
 import { BASE_API_URL } from "../../constants/Constants";
 import { Modal, Box, Button, TablePagination } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import Hls from "hls.js";
+import useHlsPlayer from "../../hooks/useHlsPlayer";
 interface Course {
   id: number;
   title: string;
@@ -50,7 +52,10 @@ const CourseManagement: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
-  const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
+  const [originalVideo, setOriginalVideo] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useHlsPlayer(previewVideoUrl, videoRef);
 
   useEffect(() => {
     fetchCourses();
@@ -63,24 +68,84 @@ const CourseManagement: React.FC = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      const coursesWithPresignedUrls = await Promise.all(
+      const coursesWithSignedUrls = await Promise.all(
         response.data.result.map(async (course: Course) => {
-          // Gọi API để lấy presignedUrl cho video
+          // Gọi API để lấy signedUrl cho video
           if (course.videoUrl) {
-            const presignedUrlResponse = await axiosInstance.get(
-              `/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(
+            const signedUrlResponse = await axiosInstance.get(
+              `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(
                 course.videoUrl
               )}`
             );
-            return { ...course, videoUrl: presignedUrlResponse.data.url }; // Cập nhật videoUrl thành presignedUrl
+            return { ...course, videoUrl: signedUrlResponse.data };
           }
           return course; // Nếu không có videoUrl, trả về course gốc
         })
       );
-      setCourses(coursesWithPresignedUrls);
+      setCourses(coursesWithSignedUrls);
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
+  };
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsUploading(true); // Bắt đầu quá trình upload
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+
+        //  Gửi yêu cầu tải lên video
+        const uploadResponse = await axiosInstance.post(
+          "/api/v1/video/gcs/upload",
+          uploadFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const nameUrl = uploadResponse.data; //name video
+        console.log("Uploaded video URL: ", nameUrl);
+
+        const signedUrlResponse = await axiosInstance.get(
+          `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(nameUrl)}`);
+
+        const signedUrl = signedUrlResponse.data; // URL ký kết
+        console.log("Signed video URL: ", signedUrl);
+
+        // Cập nhật URL video
+        if (openEditModal && editCourse) {
+          setOriginalVideo(nameUrl);
+          setEditCourse((prevEditCourse) => ({
+            ...prevEditCourse!,
+            videoUrl: signedUrl, // Cập nhật videoUrl cho editCourse
+          }));
+        } else {
+          setOriginalVideo(nameUrl);
+          setNewCourse((prevNewCourse) => ({
+            ...prevNewCourse,
+            videoUrl: signedUrl, // Cập nhật videoUrl cho newCourse
+          }));
+        }
+
+        toast.success("Tải video thành công!"); // Thông báo khi video tải lên thành công
+      } catch (error: any) {
+        console.error("Error uploading video:", error);
+        toast.error("Lỗi khi tải video lên Google Cloud Storage!");
+      } finally {
+        setIsUploading(false); // Kết thúc quá trình upload
+      }
+    }
+  };
+  console.log("url signed video", previewVideoUrl);
+
+  //xem video
+  const handleVideoPreview = (videoUrl: string) => {
+    console.log("Video URL:", videoUrl); // Thêm dòng này để debug
+    setPreviewVideoUrl(videoUrl);
   };
 
   // Handle file selection
@@ -131,7 +196,7 @@ const CourseManagement: React.FC = () => {
           ...newCourse,
           idUserCreate: userId,
           cover: coverUrl,
-          videoUrl: originalVideoUrl,
+          videoUrl: originalVideo,
         },
         {
           headers: {
@@ -215,10 +280,10 @@ const CourseManagement: React.FC = () => {
           `/api/v1/course/update`,
           {
             ...editCourse,
-            idCourse: editCourse.id, // Include the course ID
-            idUserUpdate: userId, // User ID
-            cover: coverUrl, // Updated cover URL
-            videoUrl: originalVideoUrl,
+            idCourse: editCourse.id,
+            idUserUpdate: userId,
+            cover: coverUrl,
+            videoUrl: originalVideo,
           },
           {
             headers: {
@@ -226,7 +291,7 @@ const CourseManagement: React.FC = () => {
             },
           }
         );
-        fetchCourses(); // Refresh course list
+        fetchCourses();
         setEditCourse(null);
         setOpenEditModal(false);
         toast.success("Khóa học đã được cập nhật thành công!");
@@ -237,7 +302,6 @@ const CourseManagement: React.FC = () => {
     }
   };
 
-  // Handle file selection for editing cover image
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
@@ -286,68 +350,6 @@ const CourseManagement: React.FC = () => {
     setSelectedImage(null);
   };
 
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setIsUploading(true); // Bắt đầu quá trình upload
-      try {
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", file);
-
-        //  Gửi yêu cầu tải lên video
-        const uploadResponse = await axiosInstance.post(
-          "/api/v1/video/upload",
-          uploadFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        const videoUrl = uploadResponse.data.url; // URL thuần của video
-        console.log("Uploaded video URL: ", videoUrl);
-
-        //  Gọi API để lấy presigned URL
-        const presignedUrlResponse = await axiosInstance.get(
-          `/api/v1/video/get-presigned-url?fileUrl=${encodeURIComponent(
-            videoUrl
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        const presignedUrl = presignedUrlResponse.data.url; // URL ký kết
-
-        // Cập nhật URL video
-        if (openEditModal && editCourse) {
-          setOriginalVideoUrl(videoUrl);
-          setEditCourse((prevEditCourse) => ({
-            ...prevEditCourse!,
-            videoUrl: presignedUrl, // Cập nhật videoUrl cho editCourse
-          }));
-        } else {
-          setOriginalVideoUrl(videoUrl);
-          setNewCourse((prevNewCourse) => ({
-            ...prevNewCourse,
-            videoUrl: presignedUrl, // Cập nhật videoUrl cho newCourse
-          }));
-        }
-
-        toast.success("Tải video thành công!"); // Thông báo khi video tải lên thành công
-      } catch (error: any) {
-        console.error("Error uploading video:", error);
-        toast.error("Lỗi khi tải video lên S3!");
-      } finally {
-        setIsUploading(false); // Kết thúc quá trình upload
-      }
-    }
-  };
-
   const handleChangePage = (
     _: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
@@ -362,11 +364,6 @@ const CourseManagement: React.FC = () => {
     setPage(0);
   };
 
-  //xem video
-  const handleVideoPreview = (videoUrl: string) => {
-    console.log("Video URL:", videoUrl); // Thêm dòng này để debug
-    setPreviewVideoUrl(videoUrl);
-  };
   return (
     <>
       <AdminLayout avatar={avatar} role={role}>
@@ -492,7 +489,13 @@ const CourseManagement: React.FC = () => {
                       }}
                     >
                       <video
-                        src={newCourse.videoUrl}
+                        ref={(videoRef) => {
+                          if (videoRef) {
+                            const hls = new Hls();
+                            hls.loadSource(newCourse.videoUrl);
+                            hls.attachMedia(videoRef);
+                          }
+                        }}
                         controls
                         preload="metadata" // tải dữ liệu trước để view cho tối ưu
                         style={{
@@ -607,7 +610,13 @@ const CourseManagement: React.FC = () => {
                     <label htmlFor="video">Video hiện tại</label>
                     {editCourse.videoUrl ? (
                       <video
-                        src={editCourse.videoUrl}
+                        ref={(videoRef) => {
+                          if (videoRef) {
+                            const hls = new Hls();
+                            hls.loadSource(editCourse.videoUrl);
+                            hls.attachMedia(videoRef);
+                          }
+                        }}
                         controls
                         style={{ width: "100%", marginTop: "10px" }}
                       />
@@ -820,7 +829,13 @@ const CourseManagement: React.FC = () => {
                   }}
                 >
                   <video
-                    src={previewVideoUrl}
+                    ref={(videoRef) => {
+                      if (videoRef) {
+                        const hls = new Hls();
+                        hls.loadSource(previewVideoUrl);
+                        hls.attachMedia(videoRef);
+                      }
+                    }}
                     controls
                     preload="metadata"
                     style={{
