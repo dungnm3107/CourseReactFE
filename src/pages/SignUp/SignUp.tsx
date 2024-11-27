@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logoCourse.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -17,7 +17,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 // import { GoogleLogin } from "@react-oauth/google";
-import { useAuth } from "../../service/AuthContext";
+// import { useAuth } from "../../service/AuthContext";
 import axiosInstance from "../../config/axios";
 
 const defaultTheme = createTheme();

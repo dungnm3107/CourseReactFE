@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CardMedia from "@mui/material/CardMedia";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBatteryFull, faFilm } from "@fortawesome/free-solid-svg-icons";
