@@ -9,6 +9,7 @@ interface LoginModalProps {
   open: boolean;
   onClose: () => void;
   onSwitchToSignUp: () => void;
+  onSuccessfulLogin: () => void;
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({

@@ -19,7 +19,7 @@ export function AdvertBanner() {
     <>
       <div
         className="container-fluid mt-2 mb-2 nav"
-        style={{ height: "350px", margin: "0px", padding: "0px" }}
+        style={{ height: "400px", margin: "0px", padding: "0px" }}
       >
         <Swiper
           cssMode={true}

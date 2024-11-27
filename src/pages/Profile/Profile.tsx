@@ -8,7 +8,6 @@ import imgbg from "../../assets/images/profile.jpg";
 import axiosInstance from "../../config/axios";
 import { isToken } from "../../service/JwtService";
 import { useAuth } from "../../service/AuthContext";
-import { BASE_API_URL } from "../../constants/Constants";
 interface WatchedCourse {
   id: number;
   title: string;
@@ -20,6 +19,9 @@ const Profile: React.FC = () => {
     fullName: "",
     avatar: "",
     role: "",
+    email: "",
+    phone: "",
+    userName: "",
   });
   const [watchedCourses, setWatchedCourses] = useState<WatchedCourse[]>([]);
   const { isLoggedIn, checkLoginStatus, userId, createdDate } = useAuth();
@@ -36,15 +38,22 @@ const Profile: React.FC = () => {
         fullName: response.data.fullName,
         avatar: response.data.avatar,
         role: response.data.listRoles[0].roleName,
+        email: response.data.email,
+        phone: response.data.phone,
+        userName: response.data.userName,
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
-  const formattedDate = createdDate 
-  ? new Intl.DateTimeFormat("vi-VN", { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(createdDate))
-  : "";
+  const formattedDate = createdDate
+    ? new Intl.DateTimeFormat("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(createdDate))
+    : "";
 
   const fetchWatchedCourses = async () => {
     try {
@@ -82,7 +91,11 @@ const Profile: React.FC = () => {
             src={imgbg}
             alt="Cover"
             className="img-fluid w-100"
-            style={{ height: "350px", objectFit: "cover" }}
+            style={{
+              height: "350px",
+              objectFit: "cover",
+              borderRadius: "10px",
+            }}
           />
           <div
             className="position-absolute d-flex align-items-center"
@@ -113,6 +126,18 @@ const Profile: React.FC = () => {
               >
                 <Card.Body>
                   <h5 className="fw-bold">Giới thiệu</h5>
+                  <p>
+                    <i className="fas fa-user me-2"></i>
+                    Tên đăng nhập: {userData.userName}
+                  </p>
+                  <p>
+                    <i className="fas fa-phone me-2"></i>
+                    SDT: {userData.phone}
+                  </p>
+                  <p>
+                    <i className="fas fa-envelope me-2"></i>
+                    Email: {userData.email}
+                  </p>
                   <p>
                     <i className="fas fa-user-friends me-2"></i>
                     Thành viên của COURSE IT từ {formattedDate}
@@ -162,7 +187,7 @@ const Profile: React.FC = () => {
                               }}
                             >
                               <Card.Img
-                                src={`${BASE_API_URL}${course.cover}`}
+                                src={course.cover}
                                 alt={course.title}
                                 style={{
                                   width: "100%",

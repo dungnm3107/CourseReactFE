@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import {
   Button,
   IconButton,
@@ -16,7 +17,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../assets/css/lessonManagement.css";
 import Hls from "hls.js";
-
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
 interface Lesson {
   idLesson: number;
   idChapter: number;
@@ -48,7 +50,11 @@ const LessonManagement: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
   const [originalVideo, setOriginalVideo] = useState<string | null>(null);
-  // const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const navigate = useNavigate();
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   useEffect(() => {
     fetchLessons();
@@ -300,7 +306,11 @@ const LessonManagement: React.FC = () => {
       <ToastContainer />
       <div className="container-content">
         <h1>QUẢN LÝ BÀI HỌC</h1>
-
+        <div style={{ textAlign: "left"}}>
+          <IconButton onClick={handleBack} style={{ fontSize: "16px", fontWeight: "bold" }}>
+            <ArrowBackIcon /> Quay lại
+          </IconButton>
+        </div>
         <div className="button-container">
           <Button variant="contained" color="primary" onClick={handleAddLesson}>
             Thêm Bài học

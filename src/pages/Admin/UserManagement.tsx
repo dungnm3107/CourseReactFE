@@ -7,11 +7,15 @@ import {
   Box,
   Button,
   TablePagination,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAuth } from "../../service/AuthContext";
+import ClearIcon from "@mui/icons-material/Clear";
 
 type User = {
   id: number;
@@ -36,7 +40,7 @@ const UserManagement: React.FC = () => {
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState<number | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(7);
@@ -45,14 +49,27 @@ const UserManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
+  const clearSearch = () => {
+    setSearchKeyword("");
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchUsers(); // Gọi lại khi searchKeyword thay đổi
+    }, 300);
+
+    return () => clearTimeout(timeoutId); // Xóa timeout khi unmount hoặc khi searchKeyword thay đổi
+  }, [searchKeyword]); 
+
+
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get("/api/v1/user", {
+      const response = await axiosInstance.get(`/api/v1/user/search?username=${searchKeyword}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setUsers(response.data.result);
+      setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -165,10 +182,12 @@ const UserManagement: React.FC = () => {
     setUserIdToDelete(null);
   };
 
-  const handleChangePage = (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+  const handleChangePage = (
+    _: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
     setPage(newPage);
   };
-  
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -181,11 +200,44 @@ const UserManagement: React.FC = () => {
       <AdminLayout avatar={avatar} role={role}>
         <div className="container-content">
           <h1>QUẢN LÝ NGƯỜI DÙNG</h1>
-          <div className="button-container-user">
+          <div
+            className="search-container-user"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "20px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <TextField
+                label="Tìm kiếm người dùng..."
+                variant="outlined"
+                size="small"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: "20px",  
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {searchKeyword && (
+                        <IconButton onClick={clearSearch} size="small">
+                          <ClearIcon />
+                        </IconButton>
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </div>
             <Button
               variant="contained"
               color="primary"
               onClick={() => setOpenModal(true)}
+              style={{ marginRight: "48px" }}
             >
               Thêm mới user
             </Button>

@@ -45,13 +45,12 @@ h1 {
   overflow-y: auto;
 }
 
-.course-button-container {
+.course-action-container {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  margin-right: 37px;
+  justify-content: space-between;
   margin-bottom: 20px;
 }
+
 
 button {
   padding: 10px 20px;

@@ -6,14 +6,13 @@ import "../../assets/css/navbar.css";
 import { useLogout } from "../../hooks/useLogout";
 import { useAuth } from "../../service/AuthContext";
 import axiosInstance from "../../config/axios";
-import { BASE_API_URL } from "../../constants/Constants";
 
 interface NavBarProps {
   onOpenLoginModal: () => void;
   onOpenSignUpModal: () => void;
 }
 interface Course {
-  id: string; // or number depending on your API response
+  id: string;
   title: string;
   coursePrice: number;
   cover: string;
@@ -24,10 +23,10 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
   const logout = useLogout();
   const [avatar, setAvatar] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState(""); // Từ khóa tìm kiếm
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
-  const [showResults, setShowResults] = useState(false); // State to manage the visibility of the results
-  const resultsRef = useRef<HTMLDivElement | null>(null); // Ref for the results container
+  const [showResults, setShowResults] = useState(false);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const storedAvatar = localStorage.getItem("avatar");
@@ -36,51 +35,51 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
     setRole(storedRole);
   }, [isLoggedIn]);
 
-  // Hàm gọi API tìm kiếm khóa học
+    // search
+    // dung debounce de giam tan xuat call api
+    useEffect(() => {
+      const delayDebounceFn = setTimeout(() => {
+        if (searchKeyword.trim() !== "") {
+          handleSearch();
+        } else {
+          setCourses([]);
+          setShowResults(false);
+        }
+      }, 300); // cho delay 0.3 s
+  
+      return () => clearTimeout(delayDebounceFn);
+    }, [searchKeyword]);
+
   const handleSearch = async () => {
-    if (!searchKeyword) return; // Nếu không có từ khóa thì không gọi API
+    if (!searchKeyword) return;
     try {
       const response = await axiosInstance.get(
-        `/api/v1/course/search?keyword=${searchKeyword}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Thêm token vào header
-          },
-        }
+        `/api/v1/course/search?keyword=${searchKeyword}`
       );
-      setCourses(response.data); // Lưu kết quả vào state
-      setShowResults(true); // Show results after fetching
+      setCourses(response.data);
+      setShowResults(true);
     } catch (error) {
       console.error("Error fetching courses", error);
-      setCourses([]); // Reset kết quả nếu có lỗi
-      setShowResults(true); // Show results even if there's an error
+      setCourses([]);
+      setShowResults(true);
     }
   };
 
-  // Cập nhật khi người dùng nhập từ khóa
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(event.target.value);
   };
 
-  // Cập nhật khi nhấn Enter hoặc click search
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  // Handle click outside of results to close the results container
+  // dong ket qua tim kiem khi click ra ngoai
   const handleClickOutside = (event: MouseEvent) => {
     if (
       resultsRef.current &&
       !resultsRef.current.contains(event.target as Node)
     ) {
-      setShowResults(false); // Hide the results
+      setShowResults(false); 
     }
   };
 
   useEffect(() => {
-    // Add event listener for clicks outside the results
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -98,9 +97,7 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
         backgroundColor: "#fff",
       }}
     >
-      {/* <!-- Container wrapper --> */}
       <div className="container-fluid">
-        {/* <!-- Toggle button --> */}
         <button
           className="navbar-toggler"
           type="button"
@@ -112,13 +109,12 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
         >
           <i className="fas fa-bars"></i>
         </button>
-        {/* <!-- Collapsible wrapper --> */}
+
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          {/* <!-- Navbar brand --> */}
           <Link className="navbar-brand mt-2 mt-lg-0" to="/">
             <img src={logo} width="50" alt="MDB Logo" loading="lazy" />
           </Link>
-          {/* <!-- Left links --> */}
+
           <ul
             className="navbar-nav me-auto mb-2 mb-lg-0"
             style={{
@@ -127,7 +123,7 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
               alignItems: "center",
             }}
           >
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <NavLink
                 className="nav-link fw-bold"
                 to="/"
@@ -135,7 +131,7 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
               >
                 Trang chủ
               </NavLink>
-            </li>
+            </li> */}
             <li className="nav-item">
               <NavLink
                 className="nav-link fw-bold"
@@ -146,11 +142,8 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
               </NavLink>
             </li>
           </ul>
-          {/* <!-- Left links --> */}
         </div>
-        {/* <!-- Collapsible wrapper --> */}
 
-        {/* Centered search bar */}
         <div className="flex-grow-1 d-flex justify-content">
           <form
             className="d-flex input-group w-75"
@@ -168,7 +161,6 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
                 style={{ borderRadius: "20px 0 0 20px" }}
                 value={searchKeyword}
                 onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
               />
               <button
                 className="btn btn-outline-primary"
@@ -182,22 +174,19 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
             </div>
           </form>
 
-          {/* Kết quả tìm kiếm */}
+          {/* ket qua tim kem */}
           {showResults && (
             <div
               className="search-results"
               ref={resultsRef}
               style={{
-                maxWidth: "588px", // Thu nhỏ chiều rộng tối đa
+                maxWidth: "600px",
                 width: "100%",
-                maxHeight: "400px", // Giới hạn chiều cao
-                overflowY: "auto", // Cho phép cuộn nếu có nhiều kết quả
-                // position: 'absolute',
-                // top: '100%',
+                maxHeight: "400px",
+                overflowY: "auto",
                 backgroundColor: "white",
                 boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                 borderRadius: "8px",
-                // zIndex: 1000
               }}
             >
               {courses.length > 0 ? (
@@ -210,7 +199,7 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
                         style={{ display: "flex", alignItems: "center" }}
                       >
                         <Avatar
-                          src={`${BASE_API_URL}${course.cover}`}
+                          src={course.cover}
                           alt={course.title}
                           sx={{
                             width: 40,

@@ -56,6 +56,7 @@ const CourseDetailView: React.FC = () => {
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
   const videoRef = React.createRef<HTMLVideoElement>();
   const signedUrl = useGetSignedUrl(selectedLesson?.videoUrl || "");
+  const [progressSavedCount, setProgressSavedCount] = useState(0);
 
   useHlsPlayer(signedUrl, videoRef);
 
@@ -191,12 +192,7 @@ const CourseDetailView: React.FC = () => {
     const fetchLastWatchedTime = async (lessonId: number) => {
       try {
         const response = await axiosInstance.get(
-          `/api/v1/lesson-watch-history/get?lessonId=${lessonId}&userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          `/api/v1/lesson-watch-history/get?lessonId=${lessonId}&userId=${userId}`
         );
         const lastWatchedTime = response.data;
         setInitialWatchTime(lastWatchedTime);
@@ -254,44 +250,64 @@ const CourseDetailView: React.FC = () => {
     }
   }, [id]);
 
-  // lay thoi gian xem hien tai
   useEffect(() => {
     const videoElement = document.getElementById(
       "video-player"
     ) as HTMLVideoElement;
+
+    let hasSavedWatchHistory = false; //co kiem soat call api saveWatchHistory
+
+    const handlePause = () => {
+      if (videoElement?.currentTime > 0 && !hasSavedWatchHistory) {
+        saveWatchHistory();
+        hasSavedWatchHistory = true; // Đánh dấu đã gọi
+      }
+    };
+
+    const handlePlay = () => {
+      hasSavedWatchHistory = false; // Reset cờ khi video phát lại
+    };
 
     const handleTimeUpdate = () => {
       if (videoElement) {
         setWatchedTime(videoElement.currentTime);
         setVideoDuration(videoElement.duration);
 
-        // Kiểm tra nếu thời gian còn lại dưới 1 phút
-        if (videoDuration - videoElement.currentTime <= 30) {
+       // xem > 90% thời lượng thì tính là hoàn thành
+        if (
+          videoElement.currentTime / videoDuration >= 0.9 &&
+          progressSavedCount === 0
+        ) {
           saveProgress();
+          setProgressSavedCount(1);
         }
       }
     };
 
-    // let intervalId: NodeJS.Timeout;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && !hasSavedWatchHistory) {
+        saveWatchHistory(); // Lưu khi tab bị chuyển, ẩn  đi
+        hasSavedWatchHistory = true;
+      }
+    };
 
     if (videoElement) {
+      videoElement.addEventListener("pause", handlePause);
+      videoElement.addEventListener("play", handlePlay);
       videoElement.addEventListener("timeupdate", handleTimeUpdate);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
       videoElement.addEventListener("loadedmetadata", () => {
         videoElement.currentTime = initialWatchTime;
       });
-
-      // Gọi API mỗi 30 giây thay vì mỗi lần watchedTime thay đổi
-      // intervalId = setInterval(() => {
-      //   saveWatchHistory();
-      // }, 30000); // 30 giây
     }
 
     return () => {
       if (videoElement) {
+        videoElement.removeEventListener("pause", handlePause);
+        videoElement.removeEventListener("play", handlePlay);
         videoElement.removeEventListener("timeupdate", handleTimeUpdate);
       }
-      // clearInterval(intervalId);
-      saveWatchHistory(); // Lưu lại khi rời khỏi trang
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [selectedLesson, saveWatchHistory, initialWatchTime]);
 
@@ -300,6 +316,10 @@ const CourseDetailView: React.FC = () => {
     saveWatchHistory();
   });
 
+  useEffect(() => {
+    setProgressSavedCount(0); // Reset khi chuyển sang bài học mới
+  }, [selectedLesson]);
+  
   // xu ly khi click vao lesson
   const handleLessonClick = (lesson: Lesson) => {
     saveWatchHistory();

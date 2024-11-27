@@ -169,3 +169,8 @@ button:hover {
   margin-bottom: 30px;
   width: 100%;
 }
+.search-container-user{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}

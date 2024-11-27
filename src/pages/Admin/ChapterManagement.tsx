@@ -8,13 +8,15 @@ import {
   TextField,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material"; // Import icons
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import AdminLayout from "../../components/layout/AdminLayout";
 import { useAuth } from "../../service/AuthContext";
 import { ToastContainer, toast } from "react-toastify"; // Import toast components
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import "../../assets/css/chapterManagement.css";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 
 interface Chapter {
   id: number;
@@ -36,6 +38,7 @@ const ChapterManagement: React.FC = () => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const { avatar, role } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -55,9 +58,20 @@ const ChapterManagement: React.FC = () => {
     chapterSequence: 0,
   });
   
-
-
-
+  const handleBackToCourses = () => {
+    const { from } = location.state || {};
+    if (from) {
+      navigate(from.pathname + from.search, {
+        state: {
+          page: from.page,
+          rowsPerPage: from.rowsPerPage,
+        },
+      });
+    } else {
+      navigate("/admin/course-management");
+    }
+  };
+  
   useEffect(() => {
     fetchChapters();
   }, [page, rowsPerPage]);
@@ -211,6 +225,11 @@ const ChapterManagement: React.FC = () => {
     <AdminLayout avatar={avatar} role={role}>
       <div className="container-content">
         <h1>QUẢN LÝ CHƯƠNG</h1>
+        <div style={{ textAlign: "left"}}>
+          <IconButton onClick={handleBackToCourses} style={{ fontSize: "16px", fontWeight: "bold" }}>
+            <ArrowBackIcon /> Quay lại
+          </IconButton>
+        </div>
         <div className="chapter-button-container">
           <Button variant="contained" color="primary" onClick={handleOpenModal}>
             Thêm mới chương

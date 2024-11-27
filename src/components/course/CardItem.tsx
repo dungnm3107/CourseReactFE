@@ -1,5 +1,4 @@
 
-import { BASE_API_URL } from '../../constants/Constants';
 
 interface Course {
   id: number;
@@ -25,7 +24,7 @@ export default function CardItem({ course }: CardItemProps) {
         <div className="card-body">
           <img
             style={{ height: "200px", borderRadius: "16px", objectFit: "cover" }}
-            src={`${BASE_API_URL}${course.cover}`|| "https://via.placeholder.com/150"}
+            src={course.cover|| "https://via.placeholder.com/150"}
             className="card-img-top"
             alt={course.title}
           />

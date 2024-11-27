@@ -7,8 +7,8 @@ export default function PaymentSuccess() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            navigate("/"); // Redirect to homepage after 5 seconds
-        }, 5000);
+            navigate("/"); 
+        }, 4000);
 
         return () => clearTimeout(timer);
     }, [navigate]);

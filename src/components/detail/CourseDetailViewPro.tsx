@@ -56,6 +56,7 @@ const CourseDetailViewPro: React.FC = () => {
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
   const videoRef = React.createRef<HTMLVideoElement>();
   const signedUrl = useGetSignedUrl(selectedLesson?.videoUrl || "");
+  const [progressSavedCount, setProgressSavedCount] = useState(0);
 
   useHlsPlayer(signedUrl, videoRef);
 
@@ -95,6 +96,12 @@ const CourseDetailViewPro: React.FC = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
+
+        setCompletedLessons((prevCompletedLessons) => [
+          ...prevCompletedLessons,
+          selectedLesson.id,
+        ]);
+
         console.log("Progress saved:", requestBody);
       } catch (error) {
         console.error("Error saving progress:", error);
@@ -191,12 +198,7 @@ const CourseDetailViewPro: React.FC = () => {
     const fetchLastWatchedTime = async (lessonId: number) => {
       try {
         const response = await axiosInstance.get(
-          `/api/v1/lesson-watch-history/get?lessonId=${lessonId}&userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          `/api/v1/lesson-watch-history/get?lessonId=${lessonId}&userId=${userId}`
         );
         const lastWatchedTime = response.data;
         setInitialWatchTime(lastWatchedTime);
@@ -229,12 +231,19 @@ const CourseDetailViewPro: React.FC = () => {
           const fetchedChapters = response.data.result;
           setChapters(fetchedChapters);
 
-          if (
-            fetchedChapters.length > 0 &&
-            fetchedChapters[0].lessons.length > 0
-          ) {
-            setSelectedLesson(fetchedChapters[0].lessons[0]);
-          }
+          // Lấy bài học được lưu từ localStorage hoặc mặc định bài đầu tiên
+          const savedLessonId = localStorage.getItem("lastSelectedLessonId");
+          let lessonToSelect = null;
+
+          fetchedChapters.forEach((chapter: { lessons: any[] }) => {
+            chapter.lessons.forEach((lesson) => {
+              if (lesson.id === parseInt(savedLessonId || "0", 10)) {
+                lessonToSelect = lesson;
+              }
+            });
+          });
+
+          setSelectedLesson(lessonToSelect || fetchedChapters[0].lessons[0]);
           // Mở tất cả các chương
           setExpandedChapters(
             fetchedChapters.map((chapter: { id: any }) => chapter.id)
@@ -254,46 +263,87 @@ const CourseDetailViewPro: React.FC = () => {
     }
   }, [id]);
 
-  // lay thoi gian xem hien tai
+  // xu ly video
   useEffect(() => {
     const videoElement = document.getElementById(
       "video-player"
     ) as HTMLVideoElement;
 
+    let hasSaveWatchHistory = false; //co kiem soat call api saveWatchHistory
+
+    const handlePause = () => {
+      if (videoElement?.currentTime > 0 && !hasSaveWatchHistory) {
+        saveWatchHistory();
+        hasSaveWatchHistory = true;
+      }
+    };
+    const handlePlay = () => {
+      hasSaveWatchHistory = false; // Reset cờ khi video phát lại
+    };
+
+    const handleSeeked = () => {
+      // const selectedTime = videoElement.currentTime; // Thời gian người dùng chọn
+    
+      // // Kiểm tra nếu video chưa hoàn thành và người dùng cố gắng tua tới thời gian sau thời gian ban đầu
+      // if (selectedLesson && !completedLessons.includes(selectedLesson.id) && selectedTime > watchedTime) {
+      //   videoElement.currentTime = watchedTime; // Đưa video về thời gian ban đầu (không cho tua)
+
+      //   alert("Bạn không thể tua nhanh khi chưa hoàn thành bài học.");
+      // }
+    };
     const handleTimeUpdate = () => {
       if (videoElement) {
+
+        console.log("Current Time:", videoElement.currentTime);
+        console.log("Video Duration:", videoElement.duration);
+        console.log("Progress Saved Count:", progressSavedCount);
+        
         setWatchedTime(videoElement.currentTime);
         setVideoDuration(videoElement.duration);
-
-        // Kiểm tra nếu thời gian còn lại dưới 1 phút
-        if (videoDuration - videoElement.currentTime <= 60) {
+        
+       
+        if (videoElement.currentTime >= 10 &&
+          videoElement.currentTime / videoDuration >= 0.9 &&
+          progressSavedCount === 0
+        ) {
           saveProgress();
+          setProgressSavedCount(1);
         }
       }
     };
 
-    let intervalId: NodeJS.Timeout;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && !hasSaveWatchHistory) {
+        saveWatchHistory(); // Lưu khi tab bị chuyển, ẩn  đi
+        hasSaveWatchHistory = true;
+      }
+    };
 
     if (videoElement) {
+      videoElement.addEventListener("pause", handlePause);
+      videoElement.addEventListener("play", handlePlay);
+      videoElement.addEventListener("seeked", handleSeeked);
       videoElement.addEventListener("timeupdate", handleTimeUpdate);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
       videoElement.addEventListener("loadedmetadata", () => {
         videoElement.currentTime = initialWatchTime;
       });
-
-      // Gọi API mỗi 60 giây thay vì mỗi lần watchedTime thay đổi
-      intervalId = setInterval(() => {
-        saveWatchHistory();
-      }, 60000); // 60 giây
     }
 
     return () => {
       if (videoElement) {
+        videoElement.removeEventListener("pause", handlePause);
+        videoElement.removeEventListener("play", handlePlay);
         videoElement.removeEventListener("timeupdate", handleTimeUpdate);
+        videoElement.removeEventListener("seeked", handleSeeked);
       }
-      clearInterval(intervalId);
-      saveWatchHistory(); // Lưu lại khi rời khỏi trang
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [selectedLesson, saveWatchHistory, initialWatchTime]);
+
+  useEffect(() => {
+    setProgressSavedCount(0); // Reset khi chuyển sang bài học mới
+  }, [selectedLesson]);
 
   // luu lich su khi exit
   useBeforeUnload(() => {
@@ -306,6 +356,9 @@ const CourseDetailViewPro: React.FC = () => {
     setSelectedLesson(lesson);
     setWatchedTime(0);
     setInitialWatchTime(0);
+
+    // xử lý khi load lại trang
+    localStorage.setItem("lastSelectedLessonId", lesson.id.toString());
   };
 
   const toggleChapter = (chapterId: number) => {
@@ -339,27 +392,22 @@ const CourseDetailViewPro: React.FC = () => {
 
   const findNextLesson = () => {
     if (!selectedLesson || chapters.length === 0) return null;
-    let found = false;
     for (let i = 0; i < chapters.length; i++) {
       const lessons = chapters[i].lessons;
       for (let j = 0; j < lessons.length; j++) {
         if (lessons[j].id === selectedLesson.id) {
           if (j < lessons.length - 1) {
             return lessons[j + 1]; // Next lesson in the same chapter
-          } else if (
-            i < chapters.length - 1 &&
-            chapters[i + 1].lessons.length > 0
-          ) {
+          } else if (i < chapters.length - 1 && chapters[i + 1].lessons.length > 0) {
             return chapters[i + 1].lessons[0]; // First lesson of the next chapter
           }
-          found = true;
-          break;
         }
       }
-      if (found) break;
     }
     return null;
   };
+
+
 
   // luu lich su khi back
   const handleNavigateBack = () => {
@@ -446,13 +494,8 @@ const CourseDetailViewPro: React.FC = () => {
             <button
               className="nav-button"
               onClick={handleNextLesson}
-              disabled={
-                watchedTime > 60 ||
-                (selectedLesson && completedLessons.includes(selectedLesson.id))
-                  ? false
-                  : !findNextLesson()
-              }
-            >
+              disabled={!selectedLesson || !completedLessons.includes(selectedLesson.id)}// ẩn nút sau nếu bài học hiện tại chưa hoàn thành 
+              >
               Sau <FontAwesomeIcon icon={faChevronRight} />
             </button>
 

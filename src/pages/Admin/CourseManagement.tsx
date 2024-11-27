@@ -6,9 +6,17 @@ import { useAuth } from "../../service/AuthContext";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import "../../assets/css/courseManagement.css";
-import { BASE_API_URL } from "../../constants/Constants";
-import { Modal, Box, Button, TablePagination } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import {
+  Modal,
+  Box,
+  Button,
+  TablePagination,
+  TextField,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
+import { useNavigate, useLocation } from "react-router-dom";
 import Hls from "hls.js";
 import useHlsPlayer from "../../hooks/useHlsPlayer";
 interface Course {
@@ -26,6 +34,7 @@ interface Course {
 
 const CourseManagement: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { avatar, role, userId } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [newCourse, setNewCourse] = useState<Omit<Course, "id">>({
@@ -54,23 +63,45 @@ const CourseManagement: React.FC = () => {
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
   const [originalVideo, setOriginalVideo] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
+  const [searchKeyword, setSearchKeyword] = useState("");
   useHlsPlayer(previewVideoUrl, videoRef);
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    if (location.state) {
+      const { page: savedPage, rowsPerPage: savedRowsPerPage } =
+        location.state as any;
+      if (savedPage !== undefined && savedRowsPerPage !== undefined) {
+        setPage(savedPage);
+        setRowsPerPage(savedRowsPerPage);
+      }
+    }
+  }, [location.state]);
+
   const fetchCourses = async () => {
     try {
-      const response = await axiosInstance.get("/api/v1/course/all", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      let response;
+
+      if (searchKeyword.trim() === "") {
+        // Gọi API lấy tất cả khóa học, yêu cầu token
+        response = await axiosInstance.get("/api/v1/course/all", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      } else {
+        // Gọi API tìm kiếm, không yêu cầu token
+        response = await axiosInstance.get(
+          `/api/v1/course/search?keyword=${encodeURIComponent(searchKeyword)}`
+        );
+      }
+
+      // Xử lý videoUrl nếu có
       const coursesWithSignedUrls = await Promise.all(
-        response.data.result.map(async (course: Course) => {
-          // Gọi API để lấy signedUrl cho video
+        response.data.map(async (course: Course) => {
           if (course.videoUrl) {
             const signedUrlResponse = await axiosInstance.get(
               `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(
@@ -79,14 +110,30 @@ const CourseManagement: React.FC = () => {
             );
             return { ...course, videoUrl: signedUrlResponse.data };
           }
-          return course; // Nếu không có videoUrl, trả về course gốc
+          return course;
         })
       );
-      setCourses(coursesWithSignedUrls);
+
+      setCourses(coursesWithSignedUrls); // Cập nhật danh sách khóa học
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
   };
+
+  const clearSearch = () => {
+    setSearchKeyword("");
+  };
+  useEffect(() => {
+    fetchCourses(); // Lấy tất cả khóa học khi vào trang lần đầu
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchCourses(); // Gọi lại khi searchKeyword thay đổi
+    }, 300); // Thêm độ trễ để giảm số lần gọi API không cần thiết
+    return () => clearTimeout(timeoutId); // Xóa timeout khi unmount
+  }, [searchKeyword]);
+
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -111,7 +158,8 @@ const CourseManagement: React.FC = () => {
         console.log("Uploaded video URL: ", nameUrl);
 
         const signedUrlResponse = await axiosInstance.get(
-          `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(nameUrl)}`);
+          `/api/v1/video/gcs/get-url?fileName=${encodeURIComponent(nameUrl)}`
+        );
 
         const signedUrl = signedUrlResponse.data; // URL ký kết
         console.log("Signed video URL: ", signedUrl);
@@ -275,6 +323,7 @@ const CourseManagement: React.FC = () => {
     }
 
     if (editCourse) {
+      console.log("course data" + editCourse.courseType); //PAID
       try {
         await axiosInstance.put(
           `/api/v1/course/update`,
@@ -282,6 +331,7 @@ const CourseManagement: React.FC = () => {
             ...editCourse,
             idCourse: editCourse.id,
             idUserUpdate: userId,
+            courseType: editCourse.courseType,
             cover: coverUrl,
             videoUrl: originalVideo,
           },
@@ -291,6 +341,15 @@ const CourseManagement: React.FC = () => {
             },
           }
         );
+        console.log("Payload sent to API:", {
+          ...editCourse,
+          idCourse: editCourse.id,
+          idUserUpdate: userId,
+          courseType: editCourse.courseType,
+          cover: coverUrl,
+          videoUrl: originalVideo,
+        });
+
         fetchCourses();
         setEditCourse(null);
         setOpenEditModal(false);
@@ -309,7 +368,16 @@ const CourseManagement: React.FC = () => {
   };
 
   const handleViewChapters = (courseId: number) => {
-    navigate(`/admin/chapter-management/${courseId}`);
+    navigate(`/admin/chapter-management/${courseId}`, {
+      state: {
+        from: {
+          pathname: location.pathname,
+          search: location.search,
+          page,
+          rowsPerPage,
+        },
+      },
+    });
   };
 
   // delete course
@@ -369,16 +437,50 @@ const CourseManagement: React.FC = () => {
       <AdminLayout avatar={avatar} role={role}>
         <div className="container-content">
           <h1>QUẢN LÝ KHÓA HỌC</h1>
-          <div className="course-button-container">
+          <div
+            className="course-action-container"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "20px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <TextField
+                label="Tìm kiếm khóa học..."
+                variant="outlined"
+                size="small"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "20px",
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {searchKeyword && (
+                        <IconButton onClick={clearSearch} size="small">
+                          <ClearIcon />
+                        </IconButton>
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </div>
             <Button
               variant="contained"
               color="primary"
               onClick={() => setOpenModal(true)}
+              style={{ marginRight: "30px" }}
             >
               Thêm khóa học
             </Button>
           </div>
-          {/* Add new Course Modal */}
+
+          {/*  Modal thêm mới course */}
           <Modal open={openModal} onClose={() => setOpenModal(false)}>
             <Box
               className="modal-box"
@@ -519,7 +621,7 @@ const CourseManagement: React.FC = () => {
               </form>
             </Box>
           </Modal>
-          {/* Edit Course Modal */}
+          {/* Modal chỉnh sửa course */}
           <Modal open={openEditModal} onClose={() => setOpenEditModal(false)}>
             <Box
               className="modal-box"
@@ -572,14 +674,14 @@ const CourseManagement: React.FC = () => {
                   <div className="form-group">
                     <label htmlFor="cover">Ảnh bìa hiện tại</label>
                     <div>
-                      {`${BASE_API_URL}${editCourse.cover}` && (
+                      {editCourse.cover && (
                         <img
-                          src={`${BASE_API_URL}${editCourse.cover}`}
+                          src={editCourse.cover}
                           alt="Ảnh bìa hiện tại"
                           style={{
-                            width: "200px",
+                            width: 200,
                             height: "auto",
-                            marginBottom: "10px",
+                            marginBottom: 10,
                           }}
                         />
                       )}
@@ -598,7 +700,7 @@ const CourseManagement: React.FC = () => {
                     <select
                       name="courseType"
                       id="courseType"
-                      value={editCourse.courseType}
+                      value={editCourse?.courseType || "FREE"}
                       onChange={handleEditInputChange}
                       required
                     >
@@ -606,6 +708,7 @@ const CourseManagement: React.FC = () => {
                       <option value="PAID">Trả phí</option>
                     </select>
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="video">Video hiện tại</label>
                     {editCourse.videoUrl ? (
@@ -645,7 +748,7 @@ const CourseManagement: React.FC = () => {
               )}
             </Box>
           </Modal>
-          {/* Delete Course Modal */}
+          {/* Modal xóa course */}
           <Modal
             open={openConfirmModal}
             onClose={() => setOpenConfirmModal(false)}
@@ -737,14 +840,10 @@ const CourseManagement: React.FC = () => {
                         <div className="image-cell">
                           {course.cover && (
                             <img
-                              src={`${BASE_API_URL}${course.cover}`}
+                              src={course.cover}
                               alt="Ảnh bìa"
                               style={{ width: "180px", height: "100px" }}
-                              onClick={() =>
-                                handleImageClick(
-                                  `${BASE_API_URL}${course.cover}`
-                                )
-                              }
+                              onClick={() => handleImageClick(course.cover)}
                             />
                           )}
                         </div>

@@ -65,7 +65,6 @@ export default function Home() {
         open={isLoginModalOpen}
         onClose={handleCloseLoginModal}
         onSwitchToSignUp={handleOpenSignUpModal}
-        onSuccessfulLogin={handleCloseLoginModal}
       />
       <SignUpModal
         open={isSignUpModalOpen}

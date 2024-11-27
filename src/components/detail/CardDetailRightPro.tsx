@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { useAuth } from "../../service/AuthContext"; // Use hook to get user info
@@ -23,11 +23,11 @@ export default function CardDetailRightPro({
   videoUrl,
   onOpenLoginModal,
 }: CardDetailRightProps) {
-  console.log("Course Price in CardDetailRightPro:", coursePrice); // Kiểm tra giá trị coursePrice
+  console.log("Course Price in CardDetailRightPro:", coursePrice); 
 
   const navigate = useNavigate();
   const { userId, isLoggedIn } = useAuth();
-  const [openVideoModal, setOpenVideoModal] = useState(false); // Trạng thái modal video
+  const [openVideoModal, setOpenVideoModal] = useState(false); 
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null); // URL video để xem trước
   const signedUrl = useGetSignedUrl(videoUrl);
 
@@ -80,7 +80,7 @@ export default function CardDetailRightPro({
             cursor: "pointer",
             width: "100%",
             height: "320px",
-            overflow: "hidden", // Ẩn phần video vượt quá khung
+            overflow: "hidden", 
             borderRadius: "15px",
             position: "relative",
           }}
@@ -168,7 +168,7 @@ export default function CardDetailRightPro({
                 position: "relative",
                 width: "100%",
                 height: "100%",
-                backgroundColor: "#e0e0e0", // Màu xám cho phần ngoài khung video
+                backgroundColor: "#e0e0e0", 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -185,9 +185,9 @@ export default function CardDetailRightPro({
                 controls
                 preload="metadata"
                 style={{
-                  width: "90%", // Giảm kích thước video để tạo phần viền bao quanh
+                  width: "90%", 
                   height: "90%",
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)", // Bóng đổ cho video để làm nổi bật
+                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
                 }}
               />
             </div>

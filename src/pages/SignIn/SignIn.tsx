@@ -2,8 +2,6 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -11,7 +9,6 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
-import { BASE_API_URL } from "../../constants/Constants";
 import { useAuth } from "../../service/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,6 +18,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { GoogleLogin } from "@react-oauth/google";
+import axiosInstance from "../../config/axios";
 
 
 const defaultTheme = createTheme();
@@ -36,10 +34,9 @@ export default function SignIn({
   const navigate = useNavigate();
   const {checkLoginStatus} = useAuth();
   const [showPassword, setShowPassword] = React.useState(false);
-
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-  const handleSubmit = async (event: React.FocusEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const loginData = {
@@ -48,7 +45,7 @@ export default function SignIn({
     };
 
 
-// check
+    // check
     if (!loginData.userName || !loginData.password) {
       const missingFields = [];
       if (!loginData.userName) missingFields.push("tên tài khoản");
@@ -68,8 +65,8 @@ export default function SignIn({
     }
 
     try {
-      const response = await axios.post(
-        `${BASE_API_URL}/api/v1/user/login`,
+      const response = await axiosInstance.post(
+        `/api/v1/user/login`,
         loginData,
         {
           headers: {
@@ -82,7 +79,7 @@ export default function SignIn({
       localStorage.setItem("token", response.data.result.jwtToken);
   
       // Fetch user profile data after login to get avatar and role
-      const profileResponse = await axios.get(`${BASE_API_URL}/api/v1/user/profile`, {
+      const profileResponse = await axiosInstance.get(`/api/v1/user/profile`, {
         headers: {
           'Authorization': `Bearer ${response.data.result.jwtToken}`,
         },
@@ -127,7 +124,7 @@ export default function SignIn({
 
   const handleGoogleLogin = async (credentialResponse: any) => {
     try {
-      const response = await axios.post(`${BASE_API_URL}/api/v1/SSO/loginGoogle`, {
+      const response = await axiosInstance.post(`/api/v1/SSO/loginGoogle`, {
         credential: credentialResponse.credential,
       });
       console.log("Google login success", response.data);
@@ -219,6 +216,7 @@ export default function SignIn({
            <Grid container justifyContent="flex-start">
               <Grid item>
                 <button
+                  type="button"
                   onClick={onSwitchToForgotPassword}
                   style={{
                     background: "none",
