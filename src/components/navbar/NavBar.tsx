@@ -191,7 +191,7 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
             >
               {courses.length > 0 ? (
                 <>
-                  <h4>Kết quả cho '{searchKeyword}':</h4>
+                  <h4>Kết quả tìm kiếm cho '{searchKeyword}':</h4>
                   <ul>
                     {courses.map((course) => (
                       <li
@@ -223,7 +223,7 @@ export function NavBar({ onOpenLoginModal, onOpenSignUpModal }: NavBarProps) {
                   </ul>
                 </>
               ) : (
-                <h4>Không có kết quả cho '{searchKeyword}'</h4>
+                <h4>Không có kết quả tìm kiếm cho '{searchKeyword}'</h4>
               )}
             </div>
           )}

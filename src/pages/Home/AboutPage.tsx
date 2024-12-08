@@ -12,7 +12,7 @@ export function AboutPage() {
       </header>
       <section className="about-introduction">
         <h2>Nền tảng học trực tuyến cho ngành IT</h2>
-        <p>
+        <p style={{ width: "100%", maxWidth: "1200px" }}>
           Chào mừng bạn đến với <strong>Course IT</strong> - nơi hội tụ
           những khóa học chất lượng dành cho những ai đam mê học tập và phát
           triển bản thân trong lĩnh vực công nghệ thông tin (IT). Chúng tôi
@@ -22,8 +22,8 @@ export function AboutPage() {
       </section>
       
       <section className="about-vision">
-        <h3>Tầm nhìn của chúng tôi</h3>
-        <p>
+        <h2>Tầm nhìn của chúng tôi</h2>
+        <p style={{ width: "100%", maxWidth: "1200px" }}>
           Tại <strong>Course IT</strong>, chúng tôi tin rằng kiến thức là
           sức mạnh. Chúng tôi mong muốn tạo ra một cộng đồng học tập, nơi mọi
           người đều có cơ hội học hỏi từ những chuyên gia hàng đầu trong ngành.
@@ -33,8 +33,8 @@ export function AboutPage() {
       </section>
 
       <section className="about-mission">
-        <h3>Sứ mệnh của chúng tôi</h3>
-        <p>
+        <h2>Sứ mệnh của chúng tôi</h2>
+        <p style={{ width: "100%", maxWidth: "1200px" }}>
           Sứ mệnh của chúng tôi là cung cấp các khóa học phong phú, từ miễn
           phí đến trả phí, để đáp ứng nhu cầu học tập của từng cá nhân. Chúng
           tôi cam kết đem lại trải nghiệm học tập tốt nhất cho học viên thông
@@ -44,7 +44,7 @@ export function AboutPage() {
       </section>
 
       <section className="about-features">
-        <h3>Tính năng nổi bật</h3>
+        <h2>Tính năng nổi bật</h2>
         <ul>
           <li>
             <strong>Khóa học miễn phí và trả phí:</strong> Cung cấp sự linh hoạt
@@ -63,7 +63,7 @@ export function AboutPage() {
       </section>
 
       <footer className="about-footer">
-        <Link to="/" className="about-back-home">Quay lại trang chủ</Link>
+        <Link to="/" className="about-back-home"> Quay lại trang chủ</Link>
       </footer>
     </div>
   );

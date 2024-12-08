@@ -208,7 +208,6 @@ const CourseManagement: React.FC = () => {
   // add new course
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     let coverUrl = "";
 
     if (selectedFile) {
@@ -266,9 +265,17 @@ const CourseManagement: React.FC = () => {
       });
       setOpenModal(false);
       toast.success("Khóa học đã được thêm thành công!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating course:", error);
-      toast.error("Thêm khóa học không thành công!");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Thêm khóa học không thành công!");
+      }
     }
   };
   const handleInputChange = (e: any) => {
@@ -354,9 +361,17 @@ const CourseManagement: React.FC = () => {
         setEditCourse(null);
         setOpenEditModal(false);
         toast.success("Khóa học đã được cập nhật thành công!");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error updating course:", error);
-        toast.error("Cập nhật khóa học không thành công!");
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Cập nhật khóa học không thành công!");
+        }
       }
     }
   };
@@ -397,9 +412,17 @@ const CourseManagement: React.FC = () => {
         });
         fetchCourses();
         toast.success("Khóa học đã được xóa thành công!");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Lỗi khi xóa khóa học:", error);
-        toast.error("Xóa khóa học không thành công!");
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Xóa khóa học không thành công!");
+        }
       } finally {
         setOpenConfirmModal(false);
         setCourseIdToDelete(null);
@@ -502,7 +525,7 @@ const CourseManagement: React.FC = () => {
                     id="title"
                     value={newCourse.title}
                     onChange={handleInputChange}
-                    required
+                    required // không được bỏ trống
                   />
                 </div>
                 <div className="form-group">

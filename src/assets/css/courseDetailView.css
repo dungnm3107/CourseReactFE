@@ -1,6 +1,6 @@
 .course-detail-view {
   padding: 20px;
-  background-color: #daf0f0;
+  background-color: #f3d5e4;
   max-width: 100%; 
   margin: 0 auto; 
 }
@@ -34,6 +34,7 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: relative; 
   overflow: hidden; 
+  margin-top: -30px;
 }
 
 .video-player {
@@ -69,7 +70,7 @@
   width: 100%;
   max-width: 30%;
   position: sticky;
-  margin-top: -80px;
+  margin-top: -30px;
 }
 
 .chapter {
@@ -197,3 +198,25 @@
   background-color: rgba(80, 83, 86, 0.3); 
   color: #080808; 
 }
+.course-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  margin-top: 10px;
+}
+
+.back-button {
+  margin-right: 20px;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.course-title {
+  text-align: center; 
+  flex-grow: 1; 
+  font-size: 28px;
+  margin-right: 100px;
+}
+

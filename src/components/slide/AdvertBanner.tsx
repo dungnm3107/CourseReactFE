@@ -28,7 +28,7 @@ export function AdvertBanner() {
           mousewheel={true}
           keyboard={true}
           autoplay={{
-            delay: 10000,
+            delay: 6000,
             disableOnInteraction: false,
           }}
           loop={true}

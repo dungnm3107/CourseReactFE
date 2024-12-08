@@ -23,6 +23,7 @@ import FavoritesPage from "../pages/Home/FavoritesPage";
 import LoginModal from "../../src/pages/SignIn/LoginModal";
 import SignUpModal from "../../src/pages/SignUp/SignUpModal";
 import CourseDetailViewPro from "../components/detail/CourseDetailViewPro";
+import Footer from "../components/footer/Footer";
 
 function AppRouter() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -129,6 +130,7 @@ function AppRouter() {
           element={<PaymentSuccess />}
         />
         <Route path="/about-page" element={<AboutPage />} />
+        
         <Route
           path="/favorites"
           element={

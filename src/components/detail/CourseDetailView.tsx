@@ -64,12 +64,7 @@ const CourseDetailView: React.FC = () => {
     const fetchCompletedLessons = async () => {
       try {
         const response = await axiosInstance.get(
-          `/api/v1/progress/completed?userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          `/api/v1/progress/completed?userId=${userId}`
         );
         const completedLessonIds = response.data.map(
           (lesson: { lessonId: number }) => lesson.lessonId
@@ -96,6 +91,12 @@ const CourseDetailView: React.FC = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
+
+        setCompletedLessons((prevCompletedLessons) => [
+          ...prevCompletedLessons,
+          selectedLesson.id,
+        ]);
+        
         console.log("Progress saved:", requestBody);
       } catch (error) {
         console.error("Error saving progress:", error);
@@ -111,12 +112,7 @@ const CourseDetailView: React.FC = () => {
       };
       const response = await axiosInstance.post(
         "/api/v1/favorite-lessons/toggle",
-        requestBody,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        requestBody
       );
 
       // Cập nhật favoriteLessons state với phản hồi từ API
@@ -139,12 +135,7 @@ const CourseDetailView: React.FC = () => {
     const fetchFavoriteLessons = async () => {
       try {
         const response = await axiosInstance.get(
-          `/api/v1/favorite-lessons?userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          `/api/v1/favorite-lessons?userId=${userId}`
         );
         setFavoriteLessons(response.data); // Lưu trữ dữ liệu mới vào trạng thái
       } catch (error) {
@@ -273,8 +264,9 @@ const CourseDetailView: React.FC = () => {
         setWatchedTime(videoElement.currentTime);
         setVideoDuration(videoElement.duration);
 
-       // xem > 90% thời lượng thì tính là hoàn thành
+        // xem > 90% thời lượng thì tính là hoàn thành
         if (
+          videoElement.currentTime >= 10 &&
           videoElement.currentTime / videoDuration >= 0.9 &&
           progressSavedCount === 0
         ) {
@@ -319,7 +311,7 @@ const CourseDetailView: React.FC = () => {
   useEffect(() => {
     setProgressSavedCount(0); // Reset khi chuyển sang bài học mới
   }, [selectedLesson]);
-  
+
   // xu ly khi click vao lesson
   const handleLessonClick = (lesson: Lesson) => {
     saveWatchHistory();
@@ -407,10 +399,12 @@ const CourseDetailView: React.FC = () => {
 
   return (
     <div className="course-detail-view">
-      <button onClick={handleNavigateBack} className="back-button">
-        <FontAwesomeIcon icon={faArrowLeft} /> Quay lại
-      </button>
-      <h1 className="course-title">{courseName}</h1>
+      <div className="course-header">
+        <button className="back-button" onClick={handleNavigateBack}>
+          <FontAwesomeIcon icon={faArrowLeft} /> Quay lại
+        </button>
+        <h1 className="course-title">{courseName}</h1>
+      </div>
       <div className="content-container">
         {/* Video Section */}
         <div className="video-container">
@@ -479,6 +473,38 @@ const CourseDetailView: React.FC = () => {
                 />
               </button>
             )}
+          </div>
+          <div className="lesson-description">
+            <h2
+              className="lesson-description-title"
+              style={{
+                fontSize: "24px",
+                fontWeight: "bold",
+                marginBottom: "10px",
+                marginTop: "40px",
+                marginLeft: "40px",
+                color: "#333",
+              }}
+            >
+              Mô tả
+            </h2>
+            <ul
+              className="lesson-description-content"
+              style={{
+                listStyleType: "disc",
+                paddingLeft: "40px",
+                fontSize: "16px",
+                lineHeight: "1.5",
+                color: "#555",
+                marginLeft: "30px",
+              }}
+            >
+              {selectedLesson?.content?.split(". ").map((sentence, index) => (
+                <li key={index} style={{ marginBottom: "5px" }}>
+                  {sentence.trim()}.
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 

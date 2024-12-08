@@ -120,6 +120,20 @@ const ChapterManagement: React.FC = () => {
  
 
   const handleSave = async () => {
+
+     // Kiểm tra các trường có giá trị hợp lệ
+  if (!formData.title || formData.title.trim() === "") {
+    toast.error("Tiêu đề không được để trống!");
+    return;
+  }
+  if (!formData.description || formData.description.trim() === "") {
+    toast.error("Mô tả không được để trống!");
+    return;
+  }
+  if (!formData.chapterSequence || formData.chapterSequence <= 0) {
+    toast.error("Thứ tự chương phải lớn hơn 0!");
+    return;
+  }
     if (formData.id) {
       // Cập nhật chapter
       try {

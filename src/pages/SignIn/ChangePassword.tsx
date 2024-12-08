@@ -149,7 +149,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
         }}
       />
       {incorrectFormatPW && (
-        <Typography color="error" sx={{ mb: 2, fontSize: "14px" }} align="left">
+        <Typography color="error" sx={{ mb: 2, fontSize: "14px", width: "80%" }} align="left">
           {incorrectFormatPW}
         </Typography>
       )}

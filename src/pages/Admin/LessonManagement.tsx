@@ -101,36 +101,22 @@ const LessonManagement: React.FC = () => {
       console.error("Error fetching lessons:", error);
     }
   };
-  // useEffect(() => {
-  //   if (previewVideoUrl && videoRef.current) {
-  //     // Initialize Hls.js if supported
-  //     const hls = new Hls();
-  //     if (Hls.isSupported()) {
-  //       hls.loadSource(previewVideoUrl);
-
-  //       hls.attachMedia(videoRef.current);
-  //       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-  //         console.log("Manifest loaded");
-  //       });
-  //       hls.on(Hls.Events.ERROR, (event, data) => {
-  //         console.error("HLS.js error:", data);
-  //       });
-
-  //       // Cleanup on component unmount
-  //       return () => {
-  //         hls.destroy();
-  //       };
-  //     } else if (
-  //       videoRef.current.canPlayType("application/vnd.apple.mpegurl")
-  //     ) {
-  //       // If HLS is supported natively (e.g., Safari)
-  //       videoRef.current.src = previewVideoUrl;
-  //     }
-  //   }
-  // }, [previewVideoUrl]);
 
   // Kiểm tra trạng thái và video trước khi lưu
   const handleSave = async () => {
+    if (!formData.title || formData.title.trim() === "") {
+      toast.error("Tiêu đề không được để trống!");
+      return;
+    }
+    if (!formData.content || formData.content.trim() === "") {
+      toast.error("Nội dung không được để trống!");
+      return;
+    }
+    if (!formData.lessonSequence || formData.lessonSequence <= 0) {
+      toast.error("Thứ tự bài học phải lớn hơn 0!");
+      return;
+    }
+
     // Nếu đang upload video hoặc video chưa có URL, báo lỗi
     if (isUploading || !formData.videoUrl) {
       toast.error("Vui lòng tải video trước khi lưu bài học!");
@@ -306,8 +292,11 @@ const LessonManagement: React.FC = () => {
       <ToastContainer />
       <div className="container-content">
         <h1>QUẢN LÝ BÀI HỌC</h1>
-        <div style={{ textAlign: "left"}}>
-          <IconButton onClick={handleBack} style={{ fontSize: "16px", fontWeight: "bold" }}>
+        <div style={{ textAlign: "left" }}>
+          <IconButton
+            onClick={handleBack}
+            style={{ fontSize: "16px", fontWeight: "bold" }}
+          >
             <ArrowBackIcon /> Quay lại
           </IconButton>
         </div>
@@ -334,7 +323,9 @@ const LessonManagement: React.FC = () => {
                 <tr key={lesson.idLesson}>
                   <td className="col-id">{lesson.idLesson}</td>
                   <td className="col-title">{lesson.title}</td>
-                  <td className="col-content">{lesson.content}</td>
+                  <td className="col-content">
+                    <div className="content-cell"> {lesson.content}</div>
+                    </td>
                   <td className="col-sequence">{lesson.lessonSequence}</td>
                   <td className="col-video">
                     {lesson.videoUrl ? (
@@ -396,14 +387,17 @@ const LessonManagement: React.FC = () => {
               fullWidth
               margin="normal"
             />
-            <TextField
-              label="Nội dung"
+            <label htmlFor="content">Nội dung</label>
+            <textarea
+              name="content"
+              id="content"
+              rows={4}
               value={formData.content}
               onChange={(e) =>
                 setFormData({ ...formData, content: e.target.value })
               }
-              fullWidth
-              margin="normal"
+              style={{ width: "100%" }}
+              required
             />
             <TextField
               label="Thứ tự"

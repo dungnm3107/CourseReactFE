@@ -12,10 +12,19 @@ interface Course {
   cover: string;
   courseType: "FREE" | "PAID";
 }
+interface OrderResponse {
+  id: number;
+  userId: number;
+  courseId: number;
+  totalPrice: number;
+  status: string;
+  paymentMethod: string;
+}
 
 
 export default function CardListPro() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [purchasedCourses, setPurchasedCourses] = useState<Set<number>>(new Set());
   const navigate = useNavigate();
   const { userId } = useAuth();
 
@@ -42,9 +51,24 @@ export default function CardListPro() {
         setCourses([]);
       }
     };
-
+    const checkPurchasedCourses = async () => {
+      try {
+        const response = await axiosInstance.get("/api/v1/orders/user", {
+       params: { userId },
+        });
+        const purchasedCourses: Set<number> = new Set(
+          response.data
+            .filter((order: OrderResponse) => order.status === "COMPLETED")
+            .map((order: OrderResponse) => order.courseId as number)
+        );
+        setPurchasedCourses(purchasedCourses);
+      } catch (error) {
+        console.error("Error fetching purchased courses:", error);
+      }
+    };
     fetchCourses();
-  }, []);
+    checkPurchasedCourses();
+  }, [userId]);
 
   const handleLinkClick = async (courseId: number) => {
   
@@ -96,7 +120,7 @@ export default function CardListPro() {
           courses.map((course) => (
             <div key={course.id} className="col-sm-6 col-md-4 col-lg-3 mt-3">
               <div onClick={() => handleLinkClick(course.id)} style={{ cursor: 'pointer' }}>
-                <CardItem course={course} />
+                <CardItem course={course} isPurchased={purchasedCourses.has(course.id)} />
               </div>
             </div>
           ))

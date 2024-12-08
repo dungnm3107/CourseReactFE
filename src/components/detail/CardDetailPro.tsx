@@ -79,12 +79,25 @@ export default function CardDetailPro() {
     return <div>Loading...</div>;
   }
   console.log("Course state:", course);
+
+  const renderDescription = (description: string) => {
+    const sentences = description.split('.').map((sentence) => sentence.trim()).filter((sentence) => sentence);
+    return (
+      <ul style={{ listStyleType: "disc", paddingLeft: "20px" ,width: "100%", maxWidth: "1000px"}}>
+        {sentences.map((sentence, index) => (
+          <li key={index}>{sentence}.</li>
+        ))}
+      </ul>
+    );
+  };
   return (
     <div className="row">
       <div className="col-lg-8">
         <h1>{"KHÓA HỌC: " + course.title || "No title available"}</h1>
-        <p>{course.description || "No description available"}</p>
-
+        <div>
+          {course.description ? renderDescription(course.description) : "No description available"}
+        </div>
+          
         <h3>Bạn sẽ học được những gì?</h3>
         <div className="row">
           {course.listChapter && course.listChapter.length > 0 ? (

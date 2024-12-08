@@ -115,7 +115,7 @@ const Profile: React.FC = () => {
         </div>
         <Container>
           <Row>
-            <Col md={4}>
+            <Col md={4} style={{ marginLeft: "-50px" }}>
               <Card
                 className="mb-3 "
                 style={{
@@ -157,7 +157,7 @@ const Profile: React.FC = () => {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md={8}>
+            <Col md={8} style={{ marginLeft: "50px" }}>
               <Card
                 style={{
                   borderRadius: "15px",
@@ -167,13 +167,14 @@ const Profile: React.FC = () => {
               >
                 <Card.Body>
                   <h5 className="fw-bold">Các khóa học đã xem</h5>
+                  <br />
                   {watchedCourses.map((course) => (
                     <Link
                       to={`/course-detail/${course.id}`}
                       key={course.id}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
-                      <Card className="mb-3">
+                      <Card className="mb-3"style={{ borderRadius: "15px", border: "1px solid #e0e0e0", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)" }}>
                         <Row noGutters>
                           <Col md={4} className="d-flex align-items-center">
                             <div
@@ -190,9 +191,10 @@ const Profile: React.FC = () => {
                                 src={course.cover}
                                 alt={course.title}
                                 style={{
-                                  width: "100%",
-                                  height: "100%",
+                                  width: "90%",
+                                  height: "90%",
                                   objectFit: "cover",
+                                  marginLeft: "20px",
                                 }}
                               />
                             </div>

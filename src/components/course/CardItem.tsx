@@ -11,9 +11,10 @@ interface Course {
 
 interface CardItemProps {
   course: Course;
+  isPurchased: boolean;
 }
 
-export default function CardItem({ course }: CardItemProps) {
+export default function CardItem({ course, isPurchased }: CardItemProps) {
   return (
       <div
         className="card card-hover"
@@ -30,8 +31,12 @@ export default function CardItem({ course }: CardItemProps) {
           />
           <h5 className="card-title mt-2 fw-bold" style={{ color: "black" }}>{course.title}</h5>
           <p className="card-text fw-bold">
+          {isPurchased ? (
+            <span style={{ color: "#28a745" }}>Đã mua</span>
+          ) : (
             <span style={{ color: "#DC143C" }}>{course.coursePrice.toLocaleString('vi-VN')}đ</span>
-          </p>
+          )}
+        </p>
         </div>
       </div>
   );

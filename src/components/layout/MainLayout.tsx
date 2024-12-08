@@ -36,7 +36,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </aside>
         <main className="main-content">{children}</main>
       </div>
-      <Footer />
+      <Footer onOpenLoginModal={onOpenLoginModal}/>
     </div>
   );
 };

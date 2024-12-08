@@ -3,7 +3,12 @@ import { Link } from "react-router-dom";
 import "../../assets/css/footer.css";
 import logo from "../../assets/images/logoCourse.png";
 
-export default function Footer() {
+
+interface FooterProps {
+  onOpenLoginModal: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onOpenLoginModal}) => {
   return (
     <footer
       style={{ backgroundColor: "#111111", width: "100%" }}
@@ -39,8 +44,8 @@ export default function Footer() {
             <ul className="list-unstyled">
               {[
                 { label: "Giới thiệu", link: "/about-page" },
-                { label: "Chính sách bảo mật thông tin cá nhân", link: "#!" },
-                { label: "Chính sách bảo mật thanh toán", link: "#!" },
+                { label: "Mã số thuế: 0456922901", link: "#!" },
+                { label: "Lĩnh vực hoạt động: Giáo dục, công nghệ - lập trình.", link: "#!" },
               ].map((item) => (
                 <li key={item.label}>
                   <Link to={item.link} className="text-white">
@@ -55,9 +60,9 @@ export default function Footer() {
             <h5 className="text-uppercase">TÀI KHOẢN</h5>
             <ul className="list-unstyled">
               <li>
-                <Link to={"/login"} className="text-white">
+              <a onClick={onOpenLoginModal} className="text-white">
                   Đăng nhập/Tạo mới tài khoản
-                </Link>
+                </a>
               </li>
               <li>
                 <a href="#!" className="text-white">
@@ -66,7 +71,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#!" className="text-white">
-                  Lịch sử mua hàng
+                Chính sách bảo mật thông tin cá nhân
                 </a>
               </li>
             </ul>
@@ -105,3 +110,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default Footer;

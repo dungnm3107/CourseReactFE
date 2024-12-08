@@ -5,7 +5,7 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
   useEffect(() => {
     if (signedUrl && videoRef.current) {
       const hls = new Hls({
-        xhrSetup: function (xhr) {
+        xhrSetup: function (xhr, url) {
           xhr.withCredentials = false; // Cấu hình không dùng credentials, tùy theo yêu cầu
         },
       });
@@ -14,7 +14,7 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
         console.log("Manifest loaded");
       });
 
-      hls.on(Hls.Events.ERROR, function (_, data) {
+      hls.on(Hls.Events.ERROR, function (event, data) {
         console.error("HLS.js error:", data);
       });
 
@@ -31,7 +31,7 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
         videoRef.current.src = signedUrl;
       }
     }
-  }, [signedUrl, videoRef]);
+  }, [signedUrl]);
 };
 
 export default useHlsPlayer;

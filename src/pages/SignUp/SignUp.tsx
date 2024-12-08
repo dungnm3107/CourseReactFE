@@ -33,13 +33,40 @@ export default function SignUp({
   // const { setIsLoggedIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [emailHelperText, setEmailHelperText] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordHintVisible, setPasswordHintVisible] = useState(false);
+  const [emailHintVisible, setEmailHintVisible] = useState(false);
+  const [userNameError, setUserNameError] = useState<string | null>(null);
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowConfirmPassword = () =>
     setShowConfirmPassword((show) => !show);
 
   const passwordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const handleEmailCheck = (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const email = event.target.value;
+    if (email && !emailRegex.test(email)) {
+      setEmailError("Email không đúng định dạng. Vui lòng kiểm tra lại.");
+    } else {
+      setEmailError(null); // Xóa lỗi nếu email hợp lệ
+    }
+  };
+
+  const handleUserNameCheck = (event: React.FocusEvent<HTMLInputElement>) => {
+    const userName = event.target.value;
+    if (userName && userName.length < 6) {
+      setUserNameError("Tên tài khoản phải có ít nhất 6 ký tự.");
+    } else {
+      setUserNameError(null); // Xóa lỗi nếu tên tài khoản hợp lệ
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -63,22 +90,22 @@ export default function SignUp({
       return;
     }
 
-     // check định dạng mk
-  if (!passwordRegex.test(password)) {
-    toast.error(
-      "Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.",
-      {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      }
-    );
-    return;
-  }
+    // check định dạng mk
+    if (!passwordRegex.test(password)) {
+      toast.error(
+        "Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        }
+      );
+      return;
+    }
     // xac nhan mk khong khop
     if (password !== passwordConfirm) {
       toast.error("Mật khẩu không khớp. Vui lòng kiểm tra lại.", {
@@ -121,7 +148,6 @@ export default function SignUp({
       setTimeout(() => {
         onSuccessfulSignUp();
       }, 3000);
-
     } catch (error: any) {
       console.error("Signup failed", error);
       if (error.response && error.response.data) {
@@ -144,14 +170,6 @@ export default function SignUp({
         );
       }
     }
-  };
-
-  const handleEmailFocus = () => {
-    setEmailHelperText("Vui lòng nhập chính xác email của bạn.");
-  };
-
-  const handleEmailBlur = () => {
-    setEmailHelperText(null);
   };
 
   // const handleGoogleSignUp = async (credentialResponse: any) => {
@@ -218,6 +236,9 @@ export default function SignUp({
                   id="userName"
                   label="Tên tài khoản"
                   autoFocus
+                  onBlur={handleUserNameCheck}
+                  error={!!userNameError}
+                  helperText={userNameError}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -228,9 +249,17 @@ export default function SignUp({
                   label="Email của bạn"
                   name="email"
                   autoComplete="email"
-                  onFocus={handleEmailFocus}
-                  onBlur={handleEmailBlur}
-                  helperText={emailHelperText}
+                  onBlur={(event) => {
+                    handleEmailCheck(event);
+                    setEmailHintVisible(false);
+                  }}
+                  onFocus={() => setEmailHintVisible(true)}
+                  error={!!emailError}
+                  helperText={
+                    emailError ||
+                    (emailHintVisible &&
+                      "Vui lòng nhập chính xác email của bạn.")
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
@@ -242,6 +271,8 @@ export default function SignUp({
                   type={showPassword ? "text" : "password"}
                   id="password"
                   autoComplete="new-password"
+                  onFocus={() => setPasswordHintVisible(true)}
+                  onBlur={() => setPasswordHintVisible(false)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -256,6 +287,16 @@ export default function SignUp({
                     ),
                   }}
                 />
+                {passwordHintVisible && (
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ mt: 1, ml: 1 }}
+                  >
+                    Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ
+                    thường, số và ký tự đặc biệt!
+                  </Typography>
+                )}
               </Grid>
               <Grid item xs={12}>
                 <TextField
