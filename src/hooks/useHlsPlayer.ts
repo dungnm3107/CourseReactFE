@@ -5,7 +5,7 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
   useEffect(() => {
     if (signedUrl && videoRef.current) {
       const hls = new Hls({
-        xhrSetup: function (xhr, url) {
+        xhrSetup: function (xhr, _url) {
           xhr.withCredentials = false; // Cấu hình không dùng credentials, tùy theo yêu cầu
         },
       });
@@ -14,7 +14,7 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
         console.log("Manifest loaded");
       });
 
-      hls.on(Hls.Events.ERROR, function (event, data) {
+      hls.on(Hls.Events.ERROR, function (_event, data) {
         console.error("HLS.js error:", data);
       });
 
@@ -27,7 +27,6 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
           hls.destroy();
         };
       } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-        // Nếu trình duyệt hỗ trợ HLS natively (ví dụ: Safari)
         videoRef.current.src = signedUrl;
       }
     }
