@@ -622,10 +622,11 @@ const CourseManagement: React.FC = () => {
                           }
                         }}
                         controls
-                        preload="metadata" // tải dữ liệu trước để view cho tối ưu
+                        preload="metadata"
+                        // poster={} thêm ảnh bìa cho video
                         style={{
                           maxWidth: "100%",
-                          height: "auto", // Tự động điều chỉnh chiều cao để giữ tỷ lệ
+                          height: "auto", 
                         }}
                       />
                     </Box>

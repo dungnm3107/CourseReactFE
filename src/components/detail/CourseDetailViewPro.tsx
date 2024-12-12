@@ -57,6 +57,7 @@ const CourseDetailViewPro: React.FC = () => {
   const videoRef = React.createRef<HTMLVideoElement>();
   const signedUrl = useGetSignedUrl(selectedLesson?.videoUrl || "");
   const [progressSavedCount, setProgressSavedCount] = useState(0);
+  const [previousTime, setPreviousTime] = useState(0);
 
   useHlsPlayer(signedUrl, videoRef);
 
@@ -264,16 +265,20 @@ const CourseDetailViewPro: React.FC = () => {
     };
     const handlePlay = () => {
       hasSaveWatchHistory = false; // Reset cờ khi video phát lại
+      setPreviousTime(videoElement.currentTime);
     };
 
+    
     const handleSeeked = () => {
-      // const selectedTime = videoElement.currentTime; // Thời gian người dùng chọn
-      // // Kiểm tra nếu video chưa hoàn thành và người dùng cố gắng tua tới thời gian sau thời gian ban đầu
-      // if (selectedLesson && !completedLessons.includes(selectedLesson.id) && selectedTime > watchedTime) {
-      //   videoElement.currentTime = watchedTime; // Đưa video về thời gian ban đầu (không cho tua)
-      //   alert("Bạn không thể tua nhanh khi chưa hoàn thành bài học.");
-      // }
+      const selectedTime = videoElement.currentTime; // Thời gian người dùng chọn
+
+      // Kiểm tra nếu video chưa hoàn thành và người dùng cố gắng tua quá 10s 
+      if (selectedLesson && !completedLessons.includes(selectedLesson.id) && selectedTime > previousTime + 10) {
+        videoElement.currentTime = previousTime // Đưa video về thời gian ban đầu (không cho tua)
+        alert("Bạn không thể tua nhanh quá 10s khi chưa hoàn thành bài học.");
+      }
     };
+    
     const handleTimeUpdate = () => {
       if (videoElement) {
         console.log("Current Time:", videoElement.currentTime);

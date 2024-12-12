@@ -6,7 +6,7 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
     if (signedUrl && videoRef.current) {
       const hls = new Hls({
         xhrSetup: function (xhr, _url) {
-          xhr.withCredentials = false; // Cấu hình không dùng credentials, tùy theo yêu cầu
+          xhr.withCredentials = false; // Cấu hình không dùng credentials
         },
       });
 
@@ -22,7 +22,6 @@ const useHlsPlayer = (signedUrl: string | null, videoRef: React.RefObject<HTMLVi
         hls.loadSource(signedUrl); // Đường dẫn đến playlist .m3u8
         hls.attachMedia(videoRef.current);
 
-        // Cleanup on unmount
         return () => {
           hls.destroy();
         };

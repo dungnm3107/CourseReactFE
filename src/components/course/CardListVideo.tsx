@@ -9,7 +9,7 @@ interface LessonResponse {
   title: string;
   lessonSequence: number;
   content: string;
-  videoUrl: string; // This will store the video file name
+  videoUrl: string; 
 }
 
 export default function CardListVideo() {

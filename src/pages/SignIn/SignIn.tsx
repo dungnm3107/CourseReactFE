@@ -262,6 +262,7 @@ export default function SignIn({
             <GoogleLogin
               onSuccess={(credentialResponse) => {
                 console.log(credentialResponse);
+                //credentialResponse chứ gg id token
                 handleGoogleLogin(credentialResponse);
               }}
               onError={() => {
